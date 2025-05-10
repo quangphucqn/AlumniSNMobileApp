@@ -1,111 +1,93 @@
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { Ionicons } from '@expo/vector-icons';
+import WelcomeScreen from './components/Welcome';
 import LoginScreen from './components/User/Login';
 import RegisterScreen from './components/User/Register';
+import ProfileScreen from './components/User/Profile';
+import HomeScreen from './components/Home/Home';
+import ChangePasswordScreen from './components/User/ChangePassword';
+import ChatScreen from './components/Chat/ChatRoom';
+import CreatePostScreen from './components/Post/Post';
+import { ActivityIndicator, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function WelcomeScreen({ navigation }) {
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+function MainTabs() {
   return (
-    <View style={styles.container}>
-      <View style={styles.topContent}>
-        <Image source={require('./assets/alumnis_icon.png')} style={styles.image} resizeMode="contain" />
-        <Text style={styles.title}>Welcome to{"\n"}<Text style={styles.brand}>Alumni Social Network</Text></Text>
-        <Text style={styles.subtitle}>
-          Social networks for alumni, help you find friends, exchange experiences and find job opportunities
-        </Text>
-      </View>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.loginText}>Login</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerText}>Register</Text>
-        </TouchableOpacity>
-      </View>
-      <StatusBar style="auto" />
-    </View>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+          if (route.name === 'Home') {
+            iconName = focused ? 'home' : 'home-outline';
+          } else if (route.name === 'Chat') {
+            iconName = focused ? 'chatbubble' : 'chatbubble-outline';
+          } else if (route.name === 'CreatePost') {
+            iconName = focused ? 'create' : 'create-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'person' : 'person-outline';
+          }
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: '#222',
+        tabBarInactiveTintColor: '#888',
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Trang chủ' }} />
+      <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Tin nhắn' }} />
+      <Tab.Screen name="CreatePost" component={CreatePostScreen} options={{ title: 'Đăng bài' }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Cá nhân' }} />
+    </Tab.Navigator>
   );
 }
 
-const Stack = createNativeStackNavigator();
-
 export default function App() {
+  const [initialRoute, setInitialRoute] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        if (token) {
+          setInitialRoute('MainApp');
+        } else {
+          setInitialRoute('Welcome');
+        }
+      } catch (e) {
+        setInitialRoute('Welcome');
+      } finally {
+        setLoading(false);
+      }
+    };
+    checkLogin();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#222" />
+      </View>
+    );
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+        <Stack.Screen name="MainApp" component={MainTabs} />
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
+        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       </Stack.Navigator>
+      <StatusBar style="auto" />
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-    padding: 24,
-  },
-  topContent: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  image: {
-    width: 160,
-    height: 160,
-    marginBottom: 24,
-    marginTop: 24,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  brand: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#888',
-    textAlign: 'center',
-    marginBottom: 32,
-    marginHorizontal: 12,
-  },
-  loginButton: {
-    backgroundColor: '#222',
-    paddingVertical: 14,
-    borderRadius: 10,
-    width: '100%',
-    marginBottom: 12,
-  },
-  loginText: {
-    color: '#fff',
-    fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  registerButton: {
-    backgroundColor: '#ccc',
-    paddingVertical: 14,
-    borderRadius: 10,
-    width: '100%',
-  },
-  registerText: {
-    color: '#222',
-    fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: 40,
-  },
-});

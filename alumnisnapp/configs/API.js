@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.49:8000/';
+const BASE_URL = 'http://192.168.1.4:8000/';
 
 const CLIENT_ID = 'rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb';
 const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO';
@@ -116,8 +116,9 @@ export const api = {
     resumeSurvey: (accessToken, id) => authAPI(accessToken).get(`${endpoints.surveys}/${id}/resume/`),
     
     // Group APIs
-    getGroups: (accessToken, params) => authAPI(accessToken).get(endpoints.groups, { params }),
+    getGroups: (accessToken, q, page = 1) => authAPI(accessToken).get(endpoints.groups, { params: { ...(q ? { q } : {}), page } }),
     createGroup: (accessToken, data) => authAPI(accessToken).post(endpoints.groups, data),
+    getGroupDetail: (accessToken, id) => authAPI(accessToken).get(`${endpoints.groups}/${id}/`),
     updateGroup: (accessToken, id, data) => authAPI(accessToken).patch(`${endpoints.groups}/${id}/`, data),
     deleteGroup: (accessToken, id) => authAPI(accessToken).delete(`${endpoints.groups}/${id}/`),
     addUsers: (accessToken, id, data) => authAPI(accessToken).post(`${endpoints.groups}/${id}/add_users/`, data),

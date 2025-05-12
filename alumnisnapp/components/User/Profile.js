@@ -6,23 +6,19 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { api } from '../../configs/API';
-import { MyUserContext, MyDispatchContext } from '../../configs/Context';
+import { MyUserContext } from '../../configs/Context';
 
 // Component cho Drawer Content
 function DrawerContent({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
-  const dispatch = useContext(MyDispatchContext);
-
+  const { dispatch } = useContext(MyUserContext);
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      // Chỉ xóa access_token và refresh_token khi logout, không cần xóa user
+      // Chỉ xóa access_token và refresh_token khi logout
       await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
-      dispatch({ type: 'logout' });
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Welcome' }],
-      });
+      
+      dispatch({ type: 'logout' })
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert('Lỗi', 'Có lỗi xảy ra khi đăng xuất');
@@ -73,8 +69,8 @@ function DrawerContent({ navigation }) {
 
 function ProfileContent() {
   const navigation = useNavigation();
-  const user = useContext(MyUserContext);
-  const dispatch = useContext(MyDispatchContext);
+  const { state, dispatch } = useContext(MyUserContext);
+  const user = state.user;
   const [refreshing, setRefreshing] = useState(false);
 
   // Hàm lấy user mới nhất từ server và cập nhật vào context
@@ -106,11 +102,7 @@ function ProfileContent() {
   };
 
   if (!user) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return null;
   }
 
   return (

@@ -82,7 +82,7 @@ export default function CreateTeacher() {
         style={[styles.backButton, { top: insets.top + 8 }]}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="arrow-back" size={28} color="#222" />
+        <Ionicons name="chevron-back" size={28} color="#222" />
       </TouchableOpacity>
       <View style={[styles.container, { marginTop: 40 }]}>
         <Text style={styles.title}>Tạo tài khoản giảng viên</Text>

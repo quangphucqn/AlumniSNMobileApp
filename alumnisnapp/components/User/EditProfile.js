@@ -6,15 +6,15 @@ import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MyUserContext, MyDispatchContext } from '../../configs/Context';
+import { MyUserContext } from '../../configs/Context';
 import * as FileSystem from 'expo-file-system';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 export default function EditProfile() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const user = useContext(MyUserContext);
-  const dispatch = useContext(MyDispatchContext);
+  const { state, dispatch } = useContext(MyUserContext);
+  const user = state.user;
   const [loading, setLoading] = useState(false);
   const [avatar, setAvatar] = useState(user?.avatar || null);
   const [cover, setCover] = useState(user?.cover || null);
@@ -104,7 +104,7 @@ export default function EditProfile() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <TouchableOpacity style={[styles.backButton, { top: insets.top + 8 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={28} color="#222" />
+        <Ionicons name="chevron-back" size={28} color="#222" />
       </TouchableOpacity>
       <Text style={styles.title}>Chỉnh sửa trang cá nhân</Text>
       <View style={styles.section}>

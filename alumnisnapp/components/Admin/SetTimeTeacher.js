@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from './AdminStyles';
 
 function formatVNTime(isoString) {
   if (!isoString) return '';
@@ -97,7 +98,7 @@ export default function SetTimeTeacher() {
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
       <View style={styles.infoCol}>
         <Text style={styles.name}>{item.last_name} {item.first_name}</Text>
-        <Text style={styles.email}>{item.email}</Text>
+        <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">{item.email}</Text>
         <Text style={styles.time}>Ngày quá hạn: {formatVNTime(item.password_reset_time)}</Text>
       </View>
       <TouchableOpacity
@@ -116,8 +117,8 @@ export default function SetTimeTeacher() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <TouchableOpacity style={[styles.backBtn, { marginTop: insets.top + 4 }]} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#222" />
+      <TouchableOpacity style={[styles.backBtn, { marginTop: 2 }]} onPress={() => navigation.goBack()}>
+        <Ionicons name="chevron-back" size={24} color="#222" />
       </TouchableOpacity>
       <Text style={styles.title}>Giảng viên quá hạn đổi mật khẩu</Text>
       <View style={styles.searchBar}>
@@ -135,7 +136,7 @@ export default function SetTimeTeacher() {
         data={data}
         keyExtractor={item => item.id.toString()}
         renderItem={renderItem}
-        contentContainerStyle={{ paddingBottom: 24, paddingTop: 8 }}
+        contentContainerStyle={{ paddingBottom: 24, paddingTop: 4 }}
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.2}
@@ -152,96 +153,3 @@ export default function SetTimeTeacher() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f6f7fb',
-  },
-  backBtn: {
-    marginLeft: 20,
-    marginBottom: 16,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#222',
-    textAlign: 'center',
-    marginBottom: 18,
-    marginTop: 8,
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-    paddingVertical: 4,
-  },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 14,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    marginRight: 14,
-    borderWidth: 2,
-    borderColor: '#3b82f6',
-  },
-  infoCol: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  name: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 2,
-  },
-  email: {
-    fontSize: 14,
-    color: '#444',
-    marginBottom: 1,
-  },
-  time: {
-    fontSize: 13,
-    color: '#e11d48',
-  },
-  setBtn: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 8,
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    marginLeft: 6,
-  },
-  setText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-});

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MyDispatchContext } from '../../configs/Context';
+import { MyUserContext } from '../../configs/Context';
 
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +16,7 @@ export default function Login({ navigation, route }) {
   const [changePasswordDeadline, setChangePasswordDeadline] = useState(null);
 
   // Lấy hàm dispatch từ context để cập nhật trạng thái user toàn app
-  const dispatch = useContext(MyDispatchContext);
+  const { dispatch } = useContext(MyUserContext);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -108,7 +108,7 @@ export default function Login({ navigation, route }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={styles.container}>
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
         <View style={{ marginTop: 16 }} />
         <Text style={styles.title}>Đăng nhập ngay nàooo!</Text>

@@ -5,6 +5,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import styles from './AdminStyles';
 
 export default function VerifyUser() {
   const navigation = useNavigation();
@@ -87,9 +88,9 @@ export default function VerifyUser() {
     <View style={styles.userRow}>
       <Image source={{ uri: item.avatar }} style={styles.avatar} />
       <View style={styles.infoCol}>
-        <Text style={styles.name}>{item.last_name} {item.first_name}</Text>
-        <Text style={styles.mssv}>{item.mssv}</Text>
-        <Text style={styles.email}>{item.email}</Text>
+        <Text style={styles.name} numberOfLines={1} ellipsizeMode="tail">{item.last_name} {item.first_name}</Text>
+        <Text style={styles.mssv} numberOfLines={1} ellipsizeMode="tail">{item.mssv}</Text>
+        <Text style={styles.email} numberOfLines={1} ellipsizeMode="tail">{item.email}</Text>
       </View>
       <TouchableOpacity style={styles.verifyBtn} onPress={() => handleVerify(item.id)} disabled={verifying === item.id}>
         {verifying === item.id ? (
@@ -104,13 +105,13 @@ export default function VerifyUser() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-        <Ionicons name="arrow-back" size={24} color="#222" />
+        <Ionicons name="chevron-back" size={24} color="#222" />
       </TouchableOpacity>
-      <Text style={styles.title}>Danh sách người dùng chưa xác thực</Text>
-      <View style={[styles.searchBar, { marginTop: insets.top + 4 }]}>
+      <Text style={styles.title}>Danh sách sinh viên chưa xác thực</Text>
+      <View style={styles.searchBar}>
         <TextInput
           style={styles.input}
-          placeholder="Tìm kiếm người dùng..."
+          placeholder="Tìm kiếm sinh viên..."
           value={search}
           onChangeText={setSearch}
         />
@@ -140,98 +141,3 @@ export default function VerifyUser() {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f6f7fb',
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  backBtn: {
-    marginLeft: 16,
-    // marginRight: 8,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-    paddingVertical: 4,
-  },
-  filterBtn: {
-    marginLeft: 8,
-  },
-  userRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 14,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#222',
-    textAlign: 'center',
-    marginBottom: 0,
-    marginTop: 20,
-  },
-  avatar: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    marginRight: 14,
-    borderWidth: 2,
-    borderColor: '#3b82f6',
-  },
-  infoCol: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  name: {
-    fontSize: 17,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 2,
-  },
-  mssv: {
-    fontSize: 14,
-    color: '#444',
-    marginBottom: 1,
-  },
-  email: {
-    fontSize: 13,
-    color: '#888',
-  },
-  verifyBtn: {
-    backgroundColor: '#3b82f6',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  verifyText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-});

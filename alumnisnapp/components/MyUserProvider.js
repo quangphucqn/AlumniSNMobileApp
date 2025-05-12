@@ -1,15 +1,16 @@
 import React, { useReducer, useEffect } from "react";
-import { MyUserContext, MyDispatchContext } from "../configs/Context";
-import MyUserReducer from "../reducer/MyUserReducer";
+import { MyUserContext } from "../configs/Context";
+import MyUserReducer, { initialState } from "../reducer/MyUserReducer";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../configs/API';
 
 export default function MyUserProvider({ children }) {
-  const [user, dispatch] = useReducer(MyUserReducer, null);
+  const [state, dispatch] = useReducer(MyUserReducer, initialState);
 
   // Khi app khởi động, nếu có access_token thì gọi API lấy user mới nhất
   useEffect(() => {
     const loadUser = async () => {
+      dispatch({ type: 'setLoading', payload: true });
       try {
         const token = await AsyncStorage.getItem('access_token');
         if (token) {
@@ -30,10 +31,8 @@ export default function MyUserProvider({ children }) {
   // Không lưu user vào AsyncStorage nữa để luôn đồng bộ với server
 
   return (
-    <MyUserContext.Provider value={user}>
-      <MyDispatchContext.Provider value={dispatch}>
-        {children}
-      </MyDispatchContext.Provider>
+    <MyUserContext.Provider value={{ state, dispatch }}>
+      {children}
     </MyUserContext.Provider>
   );
 } 

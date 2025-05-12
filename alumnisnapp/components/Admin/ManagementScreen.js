@@ -33,7 +33,7 @@ const features = [
   {
     key: 'eventinvite',
     label: 'Đăng bài viết thông báo',
-    icon: <Ionicons name="paper-plane" size={36} color="blue" />,
+    icon: <Ionicons name="paper-plane" size={36} color="#FFCC33" />,
   },
 ];
 
@@ -52,6 +52,7 @@ export default function ManagementScreen() {
               if (item.key === 'verify') navigation.navigate('VerifyUser');
               if (item.key === 'create_teacher') navigation.navigate('CreateTeacher');
               if (item.key === 'change_time') navigation.navigate('SetTimeTeacher');
+              if (item.key === 'group') navigation.navigate('Groups');
             }}
           >
             <View style={styles.iconWrapper}>{item.icon}</View>

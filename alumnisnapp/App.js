@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -15,17 +15,18 @@ import CreatePostScreen from './components/Post/Post';
 import EditProfileScreen from './components/User/EditProfile';
 import VerifyUserScreen from './components/Admin/VerifyUser';
 import { ActivityIndicator, View } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyUserProvider from './components/MyUserProvider';
 import { MyUserContext } from './configs/Context';
 import ManagementScreen from './components/Admin/ManagementScreen';
 import CreateTeacherScreen from './components/Admin/CreateTeacher';
 import SetTimeTeacherScreen from './components/Admin/SetTimeTeacher';
+import GroupsScreen from './components/Group/Groups';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
-  const user = useContext(MyUserContext);
+  const { state } = useContext(MyUserContext);
+  const user = state.user;
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -61,50 +62,44 @@ function MainTabs() {
   );
 }
 
-export default function App() {
-  const [initialRoute, setInitialRoute] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const checkLogin = async () => {
-      try {
-        const token = await AsyncStorage.getItem('access_token');
-        if (token) {
-          setInitialRoute('MainApp');
-        } else {
-          setInitialRoute('Welcome');
-        }
-      } catch (e) {
-        setInitialRoute('Welcome');
-      } finally {
-        setLoading(false);
-      }
-    };
-    checkLogin();
-  }, []);
-
-  if (loading) {
+function AppContent() {
+  const { state } = useContext(MyUserContext);
+  if (state.loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
         <ActivityIndicator size="large" color="#222" />
       </View>
     );
   }
+  if (!state.user) {
+    // Chưa đăng nhập
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Welcome">
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+      </Stack.Navigator>
+    );
+  }
+  // Đã đăng nhập
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="MainApp">
+      <Stack.Screen name="MainApp" component={MainTabs} />
+      <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+      <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+      <Stack.Screen name="VerifyUser" component={VerifyUserScreen} />
+      <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
+      <Stack.Screen name="SetTimeTeacher" component={SetTimeTeacherScreen} />
+      <Stack.Screen name="Groups" component={GroupsScreen} />
+    </Stack.Navigator>
+  );
+}
 
+export default function App() {
   return (
     <MyUserProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-          <Stack.Screen name="MainApp" component={MainTabs} />
-          <Stack.Screen name="Welcome" component={WelcomeScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-          <Stack.Screen name="VerifyUser" component={VerifyUserScreen} />
-          <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
-          <Stack.Screen name="SetTimeTeacher" component={SetTimeTeacherScreen} />
-        </Stack.Navigator>
+        <AppContent />
         <StatusBar style="auto" />
       </NavigationContainer>
     </MyUserProvider>

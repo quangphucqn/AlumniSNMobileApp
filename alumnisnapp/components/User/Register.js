@@ -129,7 +129,7 @@ export default function Register({ navigation }) {
           style={styles.backButton}
           onPress={() => (step === 1 ? navigation.goBack() : setStep(step - 1))}
         >
-          <Ionicons name="arrow-back" size={24} color="black" />
+          <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
       </View>
       <KeyboardAvoidingView

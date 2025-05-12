@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, SafeAreaView, ScrollView, Platform, StatusBar } from 'react-native';
+import { KeyboardAvoidingView, View, Text, TextInput, TouchableOpacity, StyleSheet, Image, Alert, SafeAreaView, ScrollView, Platform, StatusBar } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../configs/API';
+import * as FileSystem from 'expo-file-system';
+
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export default function Register({ navigation }) {
   const [step, setStep] = useState(1);
@@ -42,7 +45,7 @@ export default function Register({ navigation }) {
         return;
       }
       if (password.length < 8) {
-        Alert.alert('Thông báo', 'Mật khẩu phải có ít nhất 6 ký tự!');
+        Alert.alert('Thông báo', 'Mật khẩu phải có ít nhất 8 ký tự!');
         return;
       }
       if (password !== confirmPassword) {
@@ -60,6 +63,23 @@ export default function Register({ navigation }) {
     }
     setLoading(true);
     try {
+      // Kiểm tra kích thước avatar
+      const avatarInfo = await FileSystem.getInfoAsync(avatar);
+      if (avatarInfo.size > MAX_IMAGE_SIZE) {
+        Alert.alert('Thông báo', 'Ảnh đại diện vượt quá 10MB. Vui lòng chọn ảnh khác!');
+        setLoading(false);
+        return;
+      }
+
+      // Kiểm tra kích thước ảnh bìa nếu có
+      if (cover) {
+        const coverInfo = await FileSystem.getInfoAsync(cover);
+        if (coverInfo.size > MAX_IMAGE_SIZE) {
+          Alert.alert('Thông báo', 'Ảnh bìa vượt quá 10MB. Vui lòng chọn ảnh khác!');
+          setLoading(false);
+          return;
+        }
+      }
       const formData = new FormData();
       formData.append('first_name', firstName);
       formData.append('last_name', lastName);
@@ -79,7 +99,6 @@ export default function Register({ navigation }) {
           type: 'image/jpeg',
         });
       }
-      formData.append('role', 1);
       // Gọi API đăng ký
       await api.register(formData);
       Alert.alert('Thành công', 'Đăng ký thành công!');
@@ -113,123 +132,129 @@ export default function Register({ navigation }) {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
       </View>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        {step === 1 ? (
-          <View style={{ width: '100%' }}>
-            <Text style={styles.title}>Đăng ký tài khoản</Text>
-            <Text style={styles.label}>Họ</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập họ"
-                value={lastName}
-                onChangeText={setLastName}
-                autoCorrect={true}
-                autoCapitalize="words"
-              />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 20} // chỉnh độ nhích tùy thích
+      >
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          {step === 1 ? (
+            <View style={{ width: '100%' }}>
+              <Text style={styles.title}>Đăng ký tài khoản</Text>
+              <Text style={styles.label}>Họ</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập họ"
+                  value={lastName}
+                  onChangeText={setLastName}
+                  autoCorrect={true}
+                  autoCapitalize="words"
+                />
+              </View>
+              <Text style={styles.label}>Tên</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập tên"
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  autoCorrect={true}
+                  autoCapitalize="words"
+                />
+              </View>
+              <Text style={styles.label}>Mã số sinh viên</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập mã số sinh viên"
+                  value={studentId}
+                  onChangeText={setStudentId}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                />
+              </View>
+              <Text style={styles.label}>Email</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập email"
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                />
+              </View>
+              <TouchableOpacity style={styles.nextButton} onPress={handleNext} disabled={loading}>
+                <Text style={styles.nextButtonText}>Tiếp theo</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.label}>Tên</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập tên"
-                value={firstName}
-                onChangeText={setFirstName}
-                autoCorrect={true}
-                autoCapitalize="words"
-              />
+          ) : step === 2 ? (
+            <View style={{ width: '100%' }}>
+              <Text style={styles.title}>Tài khoản & Mật khẩu</Text>
+              <Text style={styles.label}>Tên đăng nhập</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập tên đăng nhập"
+                  value={username}
+                  onChangeText={setUsername}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                />
+              </View>
+              <Text style={styles.label}>Mật khẩu</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập mật khẩu"
+                  value={password}
+                  secureTextEntry={true}
+                  onChangeText={setPassword}
+                  autoCapitalize="none"
+                />
+              </View>
+              <Text style={styles.label}>Xác nhận mật khẩu</Text>
+              <View style={styles.inputContainer}>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nhập lại mật khẩu"
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  autoCapitalize="none"
+                />
+              </View>
+              <TouchableOpacity style={styles.nextButton} onPress={handleNext} disabled={loading}>
+                <Text style={styles.nextButtonText}>Tiếp theo</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.label}>Mã số sinh viên</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập mã số sinh viên"
-                value={studentId}
-                onChangeText={setStudentId}
-                autoCorrect={false}
-                autoCapitalize="none"
-              />
+          ) : (
+            <View style={{ width: '100%' }}>
+              <Text style={styles.title}>Ảnh đại diện & Cover</Text>
+              <Text style={styles.label}>Ảnh đại diện <Text style={{ color: 'red' }}>*</Text></Text>
+              <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage(setAvatar)}>
+                {avatar ? (
+                  <Image source={{ uri: avatar }} style={styles.avatar} />
+                ) : (
+                  <Text style={styles.imagePickerText}>Chọn ảnh đại diện</Text>
+                )}
+              </TouchableOpacity>
+              <Text style={styles.label}>Ảnh cover (không bắt buộc)</Text>
+              <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage(setCover)}>
+                {cover ? (
+                  <Image source={{ uri: cover }} style={styles.cover} />
+                ) : (
+                  <Text style={styles.imagePickerText}>Chọn ảnh cover</Text>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={loading}>
+                <Text style={styles.registerButtonText}>{loading ? 'Đang đăng ký...' : 'Đăng ký'}</Text>
+              </TouchableOpacity>
             </View>
-            <Text style={styles.label}>Email</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-            <TouchableOpacity style={styles.nextButton} onPress={handleNext} disabled={loading}>
-              <Text style={styles.nextButtonText}>Tiếp theo</Text>
-            </TouchableOpacity>
-          </View>
-        ) : step === 2 ? (
-          <View style={{ width: '100%' }}>
-            <Text style={styles.title}>Tài khoản & Mật khẩu</Text>
-            <Text style={styles.label}>Tên đăng nhập</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập tên đăng nhập"
-                value={username}
-                onChangeText={setUsername}
-                autoCorrect={false}
-                autoCapitalize="none"
-              />
-            </View>
-            <Text style={styles.label}>Mật khẩu</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập mật khẩu"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                autoCapitalize="none"
-              />
-            </View>
-            <Text style={styles.label}>Xác nhận mật khẩu</Text>
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập lại mật khẩu"
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                autoCapitalize="none"
-              />
-            </View>
-            <TouchableOpacity style={styles.nextButton} onPress={handleNext} disabled={loading}>
-              <Text style={styles.nextButtonText}>Tiếp theo</Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={{ width: '100%' }}>
-            <Text style={styles.title}>Ảnh đại diện & Cover</Text>
-            <Text style={styles.label}>Ảnh đại diện <Text style={{ color: 'red' }}>*</Text></Text>
-            <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage(setAvatar)}>
-              {avatar ? (
-                <Image source={{ uri: avatar }} style={styles.avatar} />
-              ) : (
-                <Text style={styles.imagePickerText}>Chọn ảnh đại diện</Text>
-              )}
-            </TouchableOpacity>
-            <Text style={styles.label}>Ảnh cover (không bắt buộc)</Text>
-            <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage(setCover)}>
-              {cover ? (
-                <Image source={{ uri: cover }} style={styles.cover} />
-              ) : (
-                <Text style={styles.imagePickerText}>Chọn ảnh cover</Text>
-              )}
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={loading}>
-              <Text style={styles.registerButtonText}>{loading ? 'Đang đăng ký...' : 'Đăng ký'}</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -245,7 +270,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 24,
+    marginBottom: 10,
     textAlign: 'center',
   },
   label: {

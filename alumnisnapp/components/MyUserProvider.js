@@ -2,40 +2,32 @@ import React, { useReducer, useEffect } from "react";
 import { MyUserContext, MyDispatchContext } from "../configs/Context";
 import MyUserReducer from "../reducer/MyUserReducer";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { api } from '../configs/API';
 
 export default function MyUserProvider({ children }) {
   const [user, dispatch] = useReducer(MyUserReducer, null);
 
-  // Load user từ AsyncStorage khi app khởi động
+  // Khi app khởi động, nếu có access_token thì gọi API lấy user mới nhất
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const userData = await AsyncStorage.getItem('user');
-        if (userData) {
-          dispatch({ type: 'login', payload: JSON.parse(userData) });
+        const token = await AsyncStorage.getItem('access_token');
+        if (token) {
+          // Gọi API lấy user mới nhất
+          const res = await api.getCurrentUser(token);
+          dispatch({ type: 'login', payload: res.data });
+        } else {
+          dispatch({ type: 'logout' });
         }
       } catch (error) {
-        console.error('Lỗi khi load user từ AsyncStorage:', error);
+        // Nếu token hết hạn hoặc lỗi thì logout
+        dispatch({ type: 'logout' });
       }
     };
     loadUser();
   }, []);
 
-  // Lưu user vào AsyncStorage mỗi khi user thay đổi
-  useEffect(() => {
-    const saveUser = async () => {
-      try {
-        if (user) {
-          await AsyncStorage.setItem('user', JSON.stringify(user));
-        } else {
-          await AsyncStorage.removeItem('user');
-        }
-      } catch (error) {
-        console.error('Lỗi khi lưu user vào AsyncStorage:', error);
-      }
-    };
-    saveUser();
-  }, [user]);
+  // Không lưu user vào AsyncStorage nữa để luôn đồng bộ với server
 
   return (
     <MyUserContext.Provider value={user}>

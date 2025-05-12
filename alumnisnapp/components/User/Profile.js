@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { api } from '../../configs/API';
+import { MyUserContext, MyDispatchContext } from '../../configs/Context';
 
 // Component cho Drawer Content
 function DrawerContent({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useContext(MyDispatchContext);
 
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      await AsyncStorage.multiRemove(['access_token', 'user']);
+      // Chỉ xóa access_token và refresh_token khi logout, không cần xóa user
+      await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
+      dispatch({ type: 'logout' });
       navigation.reset({
         index: 0,
         routes: [{ name: 'Welcome' }],
@@ -69,22 +73,37 @@ function DrawerContent({ navigation }) {
 
 function ProfileContent() {
   const navigation = useNavigation();
-  const [user, setUser] = useState(null);
+  const user = useContext(MyUserContext);
+  const dispatch = useContext(MyDispatchContext);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Hàm lấy user mới nhất từ server và cập nhật vào context
+  const loadUserData = async () => {
+    try {
+      const accessToken = await AsyncStorage.getItem('access_token');
+      if (accessToken) {
+        // Gọi API lấy user mới nhất và cập nhật vào context
+        const res = await api.getCurrentUser(accessToken);
+        dispatch({ type: 'login', payload: res.data });
+      } else {
+        // Nếu không có token thì logout
+        dispatch({ type: 'logout' });
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+      dispatch({ type: 'logout' });
+    }
+  };
 
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const userData = await AsyncStorage.getItem('user');
-        if (userData) {
-          setUser(JSON.parse(userData));
-        }
-      } catch (error) {
-        console.error('Error loading user data:', error);
-      }
-    };
-
     loadUserData();
   }, []);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await loadUserData();
+    setRefreshing(false);
+  };
 
   if (!user) {
     return (
@@ -95,60 +114,60 @@ function ProfileContent() {
   }
 
   return (
-    <View style={styles.container}>
-      {/* SafeAreaView cho phần trên */}
-      <SafeAreaView edges={['top', 'left', 'right']} style={{ flex: 1, backgroundColor: '#fff' }}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 80 }}>
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={{ flex: 1 }} />
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                <Feather name="menu" size={24} color="#222" />
-              </TouchableOpacity>
-            </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 80 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Cover + Avatar */}
+        <View style={styles.coverContainer}>
+          {user.cover ? (
+            <Image source={{ uri: user.cover }} style={styles.coverImage} />
+          ) : (
+            <View style={styles.coverPlaceholder} />
+          )}
+          <View style={styles.avatarWrapper}>
+            <Image source={{ uri: user.avatar || 'https://via.placeholder.com/150' }} style={styles.avatarImage} />
           </View>
-
-          {/* Profile Info */}
-          <View style={styles.profileSection}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{user.last_name} {user.first_name}</Text>
-              <Text style={styles.email}>{user.email}</Text>
-            </View>
-            <Image
-              source={{ uri: user.avatar || 'https://via.placeholder.com/150' }}
-              style={styles.avatar}
-            />
-          </View>
-
-          {/* Buttons */}
-          <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Chỉnh sửa trang cá nhân</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <Text style={styles.actionButtonText}>Chia sẻ trang cá nhân</Text>
+          <View style={styles.headerAbsolute}>
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <Feather name="menu" size={24} color="#222" />
             </TouchableOpacity>
           </View>
+        </View>
+        {/* InfoRow dưới cover, tránh bị nút che */}
+        <View style={styles.infoRow}>
+          <Text style={styles.profileName}>{user.last_name} {user.first_name}</Text>
+          <Text style={styles.profileEmail}>{user.email}</Text>
+        </View>
+        {/* Nội dung cuộn */}
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.actionButton} onPress={() => navigation.navigate('EditProfile')}>
+            <Text style={styles.actionButtonText}>Chỉnh sửa trang cá nhân</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Text style={styles.actionButtonText}>Chia sẻ trang cá nhân</Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* Tabs */}
-          <View style={styles.tabs}>
-            <TouchableOpacity style={[styles.tabItem, styles.tabActive]}>
-              <Text style={[styles.tabText, styles.tabTextActive]}>Bài viết</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.tabItem}>
-              <Text style={styles.tabText}>Bài viết đang trả lời</Text>
-            </TouchableOpacity>
-          </View>
+        {/* Tabs */}
+        <View style={styles.tabs}>
+          <TouchableOpacity style={[styles.tabItem, styles.tabActive]}>
+            <Text style={[styles.tabText, styles.tabTextActive]}>Bài viết</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.tabItem}>
+            <Text style={styles.tabText}>Bài viết đang trả lời</Text>
+          </TouchableOpacity>
+        </View>
 
-          {/* Empty State */}
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyText}>Bạn chưa đăng bài viết nào.</Text>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-
-    </View>
+        {/* Empty State */}
+        <View style={styles.emptyState}>
+          <Text style={styles.emptyText}>Bạn chưa đăng bài viết nào.</Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
@@ -182,45 +201,77 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 8,
-    paddingBottom: 8,
+  coverContainer: {
+    width: '100%',
+    height: 140,
+    position: 'relative',
+    backgroundColor: '#f5f5f5',
+    marginBottom: 56,
+    justifyContent: 'flex-end',
   },
-  profileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+  coverImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  avatar: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    borderWidth: 2,
-    borderColor: '#eee',
+  coverPlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#e0e0e0',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
   },
-  name: {
-    fontSize: 22,
+  avatarWrapper: {
+    position: 'absolute',
+    right: 16,
+    bottom: -48,
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    borderWidth: 4,
+    borderColor: '#fff',
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+  },
+  avatarImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 48,
+  },
+  infoRow: {
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    marginRight: 16,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  profileName: {
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#222',
-    marginBottom: 2,
   },
-  username: {
-    fontSize: 16,
-    color: '#222',
-    marginRight: 6,
-    fontWeight: '500',
-    marginBottom: 2,
+  profileEmail: {
+    fontSize: 15,
+    color: '#888',
   },
-  email: {
-    fontSize: 14,
-    color: '#666',
+  headerAbsolute: {
+    position: 'absolute',
+    top: 16,
+    left: 16,
+    zIndex: 10,
   },
   buttonRow: {
     flexDirection: 'row',

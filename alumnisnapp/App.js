@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -12,13 +12,20 @@ import HomeScreen from './components/Home/Home';
 import ChangePasswordScreen from './components/User/ChangePassword';
 import ChatScreen from './components/Chat/ChatRoom';
 import CreatePostScreen from './components/Post/Post';
+import EditProfileScreen from './components/User/EditProfile';
+import VerifyUserScreen from './components/Admin/VerifyUser';
 import { ActivityIndicator, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import MyUserProvider from './components/MyUserProvider';
+import { MyUserContext } from './configs/Context';
+import ManagementScreen from './components/Admin/ManagementScreen';
+import CreateTeacherScreen from './components/Admin/CreateTeacher';
+import SetTimeTeacherScreen from './components/Admin/SetTimeTeacher';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function MainTabs() {
+  const user = useContext(MyUserContext);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -33,6 +40,8 @@ function MainTabs() {
             iconName = focused ? 'create' : 'create-outline';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'person' : 'person-outline';
+          } else if (route.name === 'Management') {
+            iconName = focused ? 'settings' : 'settings-outline';
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
@@ -43,7 +52,11 @@ function MainTabs() {
       <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Trang chủ' }} />
       <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Tin nhắn' }} />
       <Tab.Screen name="CreatePost" component={CreatePostScreen} options={{ title: 'Đăng bài' }} />
+      {user && user.role === 0 && (
+        <Tab.Screen name="Management" component={ManagementScreen} options={{ title: 'Quản lý' }} />
+      )}
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Cá nhân' }} />
+      
     </Tab.Navigator>
   );
 }
@@ -79,15 +92,21 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-        <Stack.Screen name="MainApp" component={MainTabs} />
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Register" component={RegisterScreen} />
-        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-      </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <MyUserProvider>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
+          <Stack.Screen name="MainApp" component={MainTabs} />
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+          <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+          <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+          <Stack.Screen name="VerifyUser" component={VerifyUserScreen} />
+          <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
+          <Stack.Screen name="SetTimeTeacher" component={SetTimeTeacherScreen} />
+        </Stack.Navigator>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </MyUserProvider>
   );
 }

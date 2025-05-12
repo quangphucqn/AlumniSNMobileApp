@@ -2,7 +2,7 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.19:8000/';
+const BASE_URL = 'http://192.168.1.49:8000/';
 
 const CLIENT_ID = 'rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb';
 const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO';
@@ -17,11 +17,11 @@ export const endpoints = {
     changePassword: BASE_URL + 'user/change_password/',
     updateAvatar: BASE_URL + 'user/update_avatar/',
     updateCover: BASE_URL + 'user/update_cover/',
-    verifyUser: BASE_URL + 'user/{id}/verify_user/',
+    userVerify: BASE_URL + 'user',
     unverifiedUsers: BASE_URL + 'user/list_unverified_users/',
     createTeacher: BASE_URL + 'user/create_teacher/',
-    setPasswordResetTime: BASE_URL + 'user/{id}/set_password_reset_time/',
-    
+    setPasswordResetTime: BASE_URL + 'user',
+    getTeachersExpiredPassword: BASE_URL + 'user/teachers_expired_password_reset/',
     // Post endpoints
     posts: BASE_URL + 'posts/',
     postDetail: BASE_URL + 'posts/{id}/',
@@ -137,6 +137,14 @@ export const api = {
 
     // User APIs
     changePassword: (accessToken, data) => authAPI(accessToken).patch(endpoints.changePassword, data),
+    updateAvatar: (accessToken, data) => authAPI(accessToken).patch(endpoints.updateAvatar, data),
+    updateCover: (accessToken, data) => authAPI(accessToken).patch(endpoints.updateCover, data),
+    verifyUser: (accessToken, id) => authAPI(accessToken).patch(`${endpoints.userVerify}/${id}/verify_user/`),
+    getUnverifiedUsers: (accessToken, q, page = 1) => 
+        authAPI(accessToken).get(endpoints.unverifiedUsers, { params: { ...(q ? { q } : {}), page } }),
+    setPasswordResetTime: (accessToken, id) => authAPI(accessToken).patch(`${endpoints.setPasswordResetTime}/${id}/set_password_reset_time/`),
+    createTeacher: (accessToken, data) => authAPI(accessToken).post(endpoints.createTeacher, data),
+    getTeachersExpiredPassword: (accessToken,q,page = 1) => authAPI(accessToken).get(endpoints.getTeachersExpiredPassword, { params: { ...(q ? { q } : {}), page } }),
 };
 
 // Error handling helper
@@ -160,6 +168,6 @@ export const handleApiError = (error) => {
     }
 };
 
-export default axios.create({
-    baseURL: BASE_URL
-});
+// export default axios.create({
+//     baseURL: BASE_URL
+// });

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MyDispatchContext } from '../../configs/Context';
 
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -13,6 +14,9 @@ export default function Login({ navigation, route }) {
   const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [changePasswordDeadline, setChangePasswordDeadline] = useState(null);
+
+  // Lấy hàm dispatch từ context để cập nhật trạng thái user toàn app
+  const dispatch = useContext(MyDispatchContext);
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -33,7 +37,9 @@ export default function Login({ navigation, route }) {
         await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
         const userResponse = await api.getCurrentUser(response.data.access_token);
         const user = userResponse.data;
-        await AsyncStorage.setItem('user', JSON.stringify(user));
+        // Cập nhật user vào context toàn app
+        dispatch({ type: 'login', payload: user });
+        // console.log(user);
 
         // Xử lý theo role
         if (user.role === 0) {
@@ -43,6 +49,7 @@ export default function Login({ navigation, route }) {
           if (!user.is_verified) {
             setShowVerifyModal(true);
             await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+            dispatch({ type: 'logout' });
             return;
           } else {
             await AsyncStorage.removeItem('showAdminTab');
@@ -60,6 +67,7 @@ export default function Login({ navigation, route }) {
               if (diffHours > 24) {
                 Alert.alert('Thông báo', 'Bạn đã quá hạn đổi mật khẩu. Vui lòng liên hệ quản trị viên để được cập nhật lại thời gian đổi mật khẩu.');
                 await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+                dispatch({ type: 'logout' });
                 return;
               } else {
                 setChangePasswordDeadline(resetTime);
@@ -75,6 +83,7 @@ export default function Login({ navigation, route }) {
         } else {
           Alert.alert('Lỗi', 'Tài khoản không hợp lệ!');
           await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+          dispatch({ type: 'logout' });
         }
       } else {
         throw new Error('Không nhận được access token từ server');
@@ -102,13 +111,13 @@ export default function Login({ navigation, route }) {
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
         <View style={{ marginTop: 16 }} />
-        <Text style={styles.title}>Let's Sign you in.</Text>
+        <Text style={styles.title}>Đăng nhập ngay nàooo!</Text>
         <View style={{ height: 32 }} />
-        <Text style={styles.label}>Username</Text>
+        <Text style={styles.label}>Tên đăng nhập</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter Username"
+            placeholder="Nhập tên đăng nhập"
             placeholderTextColor="#aaa"
             value={username}
             onChangeText={setUsername}
@@ -116,11 +125,11 @@ export default function Login({ navigation, route }) {
             editable={!loading}
           />
         </View>
-        <Text style={styles.label}>Password</Text>
+        <Text style={styles.label}>Mật khẩu</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter Password"
+            placeholder="Nhập mật khẩu"
             placeholderTextColor="#aaa"
             secureTextEntry={!showPassword}
             value={password}
@@ -144,9 +153,9 @@ export default function Login({ navigation, route }) {
         <View style={{ flexGrow: 1 }} />
         <View>
           <View style={styles.registerRow}>
-            <Text style={styles.registerText}>Don't have an account ? </Text>
+            <Text style={styles.registerText}>Bạn chưa có tài khoản ? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-              <Text style={styles.registerLink}>Register</Text>
+              <Text style={styles.registerLink}>Đăng ký ngay</Text>
             </TouchableOpacity>
           </View>
           <TouchableOpacity 
@@ -155,7 +164,7 @@ export default function Login({ navigation, route }) {
             disabled={loading}
           >
             <Text style={styles.loginButtonText}>
-              {loading ? 'Đang đăng nhập...' : 'Login'}
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Text>
           </TouchableOpacity>
         </View>

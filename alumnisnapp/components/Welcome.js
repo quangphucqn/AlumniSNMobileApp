@@ -14,10 +14,10 @@ export default function WelcomeScreen({ navigation }) {
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.loginText}>Login</Text>
+          <Text style={styles.loginText}>Đăng nhập</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.registerButton} onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerText}>Register</Text>
+          <Text style={styles.registerText}>Đăng ký</Text>
         </TouchableOpacity>
       </View>
       <StatusBar style="auto" />

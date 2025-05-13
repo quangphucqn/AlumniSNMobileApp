@@ -77,11 +77,13 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#666',
     marginBottom: 2,
+    fontStyle: 'italic',
   },
   mssv: {
     fontSize: 13,
     color: '#888',
     marginBottom: 2,
+    fontWeight: 'bold',
   },
   time: {
     fontSize: 13,

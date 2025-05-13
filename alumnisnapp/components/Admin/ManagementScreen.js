@@ -53,6 +53,7 @@ export default function ManagementScreen() {
               if (item.key === 'create_teacher') navigation.navigate('CreateTeacher');
               if (item.key === 'change_time') navigation.navigate('SetTimeTeacher');
               if (item.key === 'group') navigation.navigate('Groups');
+              if (item.key === 'users') navigation.navigate('ManageUsers');
             }}
           >
             <View style={styles.iconWrapper}>{item.icon}</View>
@@ -67,7 +68,7 @@ export default function ManagementScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f6f7fb',
+    backgroundColor: 'white',
     paddingTop: 32,
     paddingHorizontal: 16,
   },
@@ -92,8 +93,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOffset: { width: 2, height: 5 },
+    shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 3,
   },

@@ -2,7 +2,6 @@
 
 import axios from 'axios';
 
-const BASE_URL = 'http://192.168.1.4:8000/';
 
 const CLIENT_ID = 'rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb';
 const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO';
@@ -11,50 +10,48 @@ const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036h
 // Định nghĩa các endpoints
 export const endpoints = {
     // User endpoints
-    login: BASE_URL + 'o/token/',
-    register: BASE_URL + 'register/',
-    currentUser: BASE_URL + 'user/current_user/',
-    changePassword: BASE_URL + 'user/change_password/',
-    updateAvatar: BASE_URL + 'user/update_avatar/',
-    updateCover: BASE_URL + 'user/update_cover/',
-    userVerify: BASE_URL + 'user',
-    unverifiedUsers: BASE_URL + 'user/list_unverified_users/',
-    createTeacher: BASE_URL + 'user/create_teacher/',
-    setPasswordResetTime: BASE_URL + 'user',
-    getTeachersExpiredPassword: BASE_URL + 'user/teachers_expired_password_reset/',
+    login: '/o/token/',
+    register: '/register/',
+    user: '/user/',
+    currentUser: '/user/current_user/',
+    changePassword: '/user/change_password/',
+    updateAvatar: '/user/update_avatar/',
+    updateCover: '/user/update_cover/',
+    userVerify: '/user',
+    unverifiedUsers: '/user/list_unverified_users/',
+    createTeacher: '/user/create_teacher/',
+    setPasswordResetTime: '/user',
+    getTeachersExpiredPassword: '/user/teachers_expired_password_reset/',
     // Post endpoints
-    posts: BASE_URL + 'posts/',
-    postDetail: BASE_URL + 'posts/{id}/',
-    myPosts: BASE_URL + 'posts/my-posts/',
-    postComment: BASE_URL + 'posts/{id}/comment/',
-    lockUnlockComment: BASE_URL + 'posts/{id}/lock-unlock-comment/',
+    posts: '/posts/',
+    postDetail: '/posts/{id}/',
+    myPosts: '/posts/my-posts/',
+    postComment: '/posts/{id}/comment/',
+    lockUnlockComment: '/posts/{id}/lock-unlock-comment/',
     
     // Comment endpoints
-    commentDetail: BASE_URL + 'comments/{id}/',
-    replyComment: BASE_URL + 'comments/{id}/reply/',
+    commentDetail: '/comments/{id}/',
+    replyComment: '/comments/{id}/reply/',
     
     // Survey endpoints
-    surveys: BASE_URL + 'surveys/',
-    surveyDetail: BASE_URL + 'surveys/{id}/',
-    surveyDraft: BASE_URL + 'surveys/{id}/draft/',
-    surveyResume: BASE_URL + 'surveys/{id}/resume/',
-    surveySubmit: BASE_URL + 'surveys/{id}/submit/',
+    surveys: '/surveys/',
+    surveyDetail: '/surveys/{id}/',
+    surveyDraft: '/surveys/{id}/draft/',
+    surveyResume: '/surveys/{id}/resume/',
+    surveySubmit: '/surveys/{id}/submit/',
     
     // Group endpoints
-    groups: BASE_URL + 'groups/',
-    groupDetail: BASE_URL + 'groups/{id}/',
-    addUsersToGroup: BASE_URL + 'groups/{id}/add_users/',
-    removeUsersFromGroup: BASE_URL + 'groups/{id}/remove_users/',
+    groups: '/groups/',
     
     // Event endpoints
-    events: BASE_URL + 'events/',
-    eventDetail: BASE_URL + 'events/{id}/',
+    events: '/events/',
+    eventDetail: '/events/{id}/',
     
     // Chat endpoints
-    chats: BASE_URL + 'chat/',
-    chatDetail: BASE_URL + 'chat/{id}/',
-    getMessages: BASE_URL + 'chat/{id}/get_messages/',
-    sendMessage: BASE_URL + 'chat/{id}/send_message/',
+    chats: '/chat/',
+    chatDetail: '/chat/{id}/',
+    getMessages: '/chat/{id}/get_messages/',
+    sendMessage: '/chat/{id}/send_message/',
 };
 
 // Tạo instance axios với token
@@ -118,11 +115,11 @@ export const api = {
     // Group APIs
     getGroups: (accessToken, q, page = 1) => authAPI(accessToken).get(endpoints.groups, { params: { ...(q ? { q } : {}), page } }),
     createGroup: (accessToken, data) => authAPI(accessToken).post(endpoints.groups, data),
-    getGroupDetail: (accessToken, id) => authAPI(accessToken).get(`${endpoints.groups}/${id}/`),
+    getGroupDetail: (accessToken, id, page = 1, q) => authAPI(accessToken).get(`${endpoints.groups}${id}/`, { params: { page, q } }),
     updateGroup: (accessToken, id, data) => authAPI(accessToken).patch(`${endpoints.groups}/${id}/`, data),
-    deleteGroup: (accessToken, id) => authAPI(accessToken).delete(`${endpoints.groups}/${id}/`),
-    addUsers: (accessToken, id, data) => authAPI(accessToken).post(`${endpoints.groups}/${id}/add_users/`, data),
-    removeUsers: (accessToken, id, data) => authAPI(accessToken).post(`${endpoints.groups}/${id}/remove_users/`, data),
+    deleteGroup: (accessToken, id) => authAPI(accessToken).delete(`${endpoints.groups}${id}/`),
+    addUsers: (accessToken, id, data) => authAPI(accessToken).post(`${endpoints.groups}${id}/add_users/`, data),
+    removeUsers: (accessToken, id, data) => authAPI(accessToken).post(`${endpoints.groups}${id}/remove_users/`, data),
     
     // Event APIs
     getEvents: (accessToken) => authAPI(accessToken).get(endpoints.events),
@@ -137,6 +134,8 @@ export const api = {
     sendMessage: (accessToken, roomId, data) => authAPI(accessToken).post(`${endpoints.chats}/${roomId}/send_message/`, data),
 
     // User APIs
+    userList: (accessToken, q, page = 1, role) => authAPI(accessToken).get(endpoints.user, { params: { ...(q ? { q } : {}), page, ...(role !== undefined && role !== '' ? { role } : {}) } }),
+    deleteUser: (accessToken, id) => authAPI(accessToken).delete(`${endpoints.user}${id}/`),
     changePassword: (accessToken, data) => authAPI(accessToken).patch(endpoints.changePassword, data),
     updateAvatar: (accessToken, data) => authAPI(accessToken).patch(endpoints.updateAvatar, data),
     updateCover: (accessToken, data) => authAPI(accessToken).patch(endpoints.updateCover, data),
@@ -169,6 +168,6 @@ export const handleApiError = (error) => {
     }
 };
 
-// export default axios.create({
-//     baseURL: BASE_URL
-// });
+export default axios.create({
+    baseURL: BASE_URL
+});

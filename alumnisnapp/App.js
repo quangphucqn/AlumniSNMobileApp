@@ -21,6 +21,11 @@ import ManagementScreen from './components/Admin/ManagementScreen';
 import CreateTeacherScreen from './components/Admin/CreateTeacher';
 import SetTimeTeacherScreen from './components/Admin/SetTimeTeacher';
 import GroupsScreen from './components/Group/Groups';
+import GroupDetailScreen from './components/Group/GroupDetail';
+import CreateGroupScreen from './components/Group/CreateGroup';
+import AddUserScreen from './components/Group/AddUser';
+import ManageUsersScreen from './components/Admin/ManageUser';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -91,17 +96,23 @@ function AppContent() {
       <Stack.Screen name="CreateTeacher" component={CreateTeacherScreen} />
       <Stack.Screen name="SetTimeTeacher" component={SetTimeTeacherScreen} />
       <Stack.Screen name="Groups" component={GroupsScreen} />
+      <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
+      <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
+      <Stack.Screen name="AddUser" component={AddUserScreen} />
+      <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
     </Stack.Navigator>
   );
 }
 
 export default function App() {
   return (
-    <MyUserProvider>
-      <NavigationContainer>
-        <AppContent />
-        <StatusBar style="auto" />
-      </NavigationContainer>
-    </MyUserProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <MyUserProvider>
+        <NavigationContainer>
+          <AppContent />
+          <StatusBar style="auto" />
+        </NavigationContainer>
+      </MyUserProvider>
+    </GestureHandlerRootView>
   );
 }

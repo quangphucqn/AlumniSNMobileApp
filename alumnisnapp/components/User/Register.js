@@ -4,6 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../configs/API';
 import * as FileSystem from 'expo-file-system';
+import UserStyles from './UserStyles';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 
@@ -126,7 +127,7 @@ export default function Register({ navigation }) {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={{ width: '100%' }}>
         <TouchableOpacity
-          style={styles.backButton}
+          style={UserStyles.backButton}
           onPress={() => (step === 1 ? navigation.goBack() : setStep(step - 1))}
         >
           <Ionicons name="chevron-back" size={24} color="black" />
@@ -137,14 +138,14 @@ export default function Register({ navigation }) {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 20} // chỉnh độ nhích tùy thích
       >
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={UserStyles.container} keyboardShouldPersistTaps="handled">
           {step === 1 ? (
             <View style={{ width: '100%' }}>
-              <Text style={styles.title}>Đăng ký tài khoản</Text>
-              <Text style={styles.label}>Họ</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.title}>Đăng ký tài khoản</Text>
+              <Text style={UserStyles.label}>Họ</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập họ"
                   value={lastName}
                   onChangeText={setLastName}
@@ -152,10 +153,10 @@ export default function Register({ navigation }) {
                   autoCapitalize="words"
                 />
               </View>
-              <Text style={styles.label}>Tên</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.label}>Tên</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập tên"
                   value={firstName}
                   onChangeText={setFirstName}
@@ -163,10 +164,10 @@ export default function Register({ navigation }) {
                   autoCapitalize="words"
                 />
               </View>
-              <Text style={styles.label}>Mã số sinh viên</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.label}>Mã số sinh viên</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập mã số sinh viên"
                   value={studentId}
                   onChangeText={setStudentId}
@@ -174,10 +175,10 @@ export default function Register({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
-              <Text style={styles.label}>Email</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.label}>Email</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập email"
                   value={email}
                   onChangeText={setEmail}
@@ -185,17 +186,17 @@ export default function Register({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
-              <TouchableOpacity style={styles.nextButton} onPress={handleNext} disabled={loading}>
-                <Text style={styles.nextButtonText}>Tiếp theo</Text>
+              <TouchableOpacity style={UserStyles.nextButton} onPress={handleNext} disabled={loading}>
+                <Text style={UserStyles.nextButtonText}>Tiếp theo</Text>
               </TouchableOpacity>
             </View>
           ) : step === 2 ? (
             <View style={{ width: '100%' }}>
-              <Text style={styles.title}>Tài khoản & Mật khẩu</Text>
-              <Text style={styles.label}>Tên đăng nhập</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.title}>Tài khoản & Mật khẩu</Text>
+              <Text style={UserStyles.label}>Tên đăng nhập</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập tên đăng nhập"
                   value={username}
                   onChangeText={setUsername}
@@ -203,10 +204,10 @@ export default function Register({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
-              <Text style={styles.label}>Mật khẩu</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.label}>Mật khẩu</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập mật khẩu"
                   value={password}
                   secureTextEntry={true}
@@ -214,10 +215,10 @@ export default function Register({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
-              <Text style={styles.label}>Xác nhận mật khẩu</Text>
-              <View style={styles.inputContainer}>
+              <Text style={UserStyles.label}>Xác nhận mật khẩu</Text>
+              <View style={UserStyles.inputContainer}>
                 <TextInput
-                  style={styles.input}
+                  style={UserStyles.input}
                   placeholder="Nhập lại mật khẩu"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
@@ -225,31 +226,31 @@ export default function Register({ navigation }) {
                   autoCapitalize="none"
                 />
               </View>
-              <TouchableOpacity style={styles.nextButton} onPress={handleNext} disabled={loading}>
-                <Text style={styles.nextButtonText}>Tiếp theo</Text>
+              <TouchableOpacity style={UserStyles.nextButton} onPress={handleNext} disabled={loading}>
+                <Text style={UserStyles.nextButtonText}>Tiếp theo</Text>
               </TouchableOpacity>
             </View>
           ) : (
             <View style={{ width: '100%' }}>
-              <Text style={styles.title}>Ảnh đại diện & Cover</Text>
-              <Text style={styles.label}>Ảnh đại diện <Text style={{ color: 'red' }}>*</Text></Text>
-              <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage(setAvatar)}>
+              <Text style={UserStyles.title}>Ảnh đại diện & Cover</Text>
+              <Text style={UserStyles.label}>Ảnh đại diện <Text style={{ color: 'red' }}>*</Text></Text>
+              <TouchableOpacity style={UserStyles.imagePicker} onPress={() => pickImage(setAvatar)}>
                 {avatar ? (
-                  <Image source={{ uri: avatar }} style={styles.avatar} />
+                  <Image source={{ uri: avatar }} style={UserStyles.avatar} />
                 ) : (
-                  <Text style={styles.imagePickerText}>Chọn ảnh đại diện</Text>
+                  <Text style={UserStyles.imagePickerText}>Chọn ảnh đại diện</Text>
                 )}
               </TouchableOpacity>
-              <Text style={styles.label}>Ảnh cover (không bắt buộc)</Text>
-              <TouchableOpacity style={styles.imagePicker} onPress={() => pickImage(setCover)}>
+              <Text style={UserStyles.label}>Ảnh cover (không bắt buộc)</Text>
+              <TouchableOpacity style={UserStyles.imagePicker} onPress={() => pickImage(setCover)}>
                 {cover ? (
-                  <Image source={{ uri: cover }} style={styles.cover} />
+                  <Image source={{ uri: cover }} style={UserStyles.cover} />
                 ) : (
-                  <Text style={styles.imagePickerText}>Chọn ảnh cover</Text>
+                  <Text style={UserStyles.imagePickerText}>Chọn ảnh cover</Text>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity style={styles.registerButton} onPress={handleRegister} disabled={loading}>
-                <Text style={styles.registerButtonText}>{loading ? 'Đang đăng ký...' : 'Đăng ký'}</Text>
+              <TouchableOpacity style={UserStyles.registerButton} onPress={handleRegister} disabled={loading}>
+                <Text style={UserStyles.registerButtonText}>{loading ? 'Đang đăng ký...' : 'Đăng ký'}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -258,107 +259,3 @@ export default function Register({ navigation }) {
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 6,
-    marginTop: 12,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 8,
-    backgroundColor: '#fff',
-    width: '100%',
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    fontSize: 16,
-    color: '#222',
-  },
-  nextButton: {
-    backgroundColor: '#222',
-    paddingVertical: 14,
-    borderRadius: 10,
-    width: '100%',
-    marginTop: 24,
-  },
-  nextButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  imagePicker: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    padding: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 16,
-    width: '100%',
-    minHeight: 120,
-    backgroundColor: '#fafafa',
-  },
-  imagePickerText: {
-    color: '#888',
-    fontSize: 16,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  cover: {
-    width: '100%',
-    height: 120,
-    borderRadius: 10,
-    resizeMode: 'cover',
-  },
-  registerButton: {
-    backgroundColor: '#222',
-    paddingVertical: 14,
-    borderRadius: 10,
-    width: '100%',
-    marginTop: 24,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  backButton: {
-    marginTop: Platform.OS === 'android' ? StatusBar.currentHeight + 8 : 8,
-    marginLeft: 8,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-    position: 'absolute',
-    left: 0,
-    top: 0,
-    zIndex: 10,
-  },
-});

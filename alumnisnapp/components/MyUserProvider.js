@@ -16,7 +16,14 @@ export default function MyUserProvider({ children }) {
         if (token) {
           // Gọi API lấy user mới nhất
           const res = await api.getCurrentUser(token);
-          dispatch({ type: 'login', payload: res.data });
+          const user = res.data;
+          // Nếu user chưa xác thực thì logout và xóa token
+          if (user.role === 1 && user.is_verified === false) {
+            await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+            dispatch({ type: 'logout' });
+            return;
+          }
+          dispatch({ type: 'login', payload: user });
         } else {
           dispatch({ type: 'logout' });
         }

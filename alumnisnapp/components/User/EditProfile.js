@@ -8,6 +8,7 @@ import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MyUserContext } from '../../configs/Context';
 import * as FileSystem from 'expo-file-system';
+import UserStyles from './UserStyles';
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
 export default function EditProfile() {
@@ -102,116 +103,30 @@ export default function EditProfile() {
   if (!user) return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}><ActivityIndicator size="large" color="#222" /></View>;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <TouchableOpacity style={[styles.backButton, { top: insets.top + 8 }]} onPress={() => navigation.goBack()}>
+    <SafeAreaView style={UserStyles.container} edges={['top', 'left', 'right']}>
+      <TouchableOpacity style={[UserStyles.backButton, { top: insets.top + 8 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={28} color="#222" />
       </TouchableOpacity>
-      <Text style={styles.title}>Chỉnh sửa trang cá nhân</Text>
-      <View style={styles.section}>
-        <Text style={styles.label}>Ảnh đại diện</Text>
-        <TouchableOpacity style={styles.avatarPicker} onPress={() => pickImage('avatar')} disabled={loading}>
-          <Image source={{ uri: avatar || 'https://via.placeholder.com/150' }} style={styles.avatar} />
-          <View style={styles.editIcon}><Ionicons name="camera" size={20} color="#fff" /></View>
+      <Text style={UserStyles.title}>Chỉnh sửa trang cá nhân</Text>
+      <View style={UserStyles.section}>
+        <Text style={UserStyles.label}>Ảnh đại diện</Text>
+        <TouchableOpacity style={UserStyles.avatarPicker} onPress={() => pickImage('avatar')} disabled={loading}>
+          <Image source={{ uri: avatar || 'https://via.placeholder.com/150' }} style={UserStyles.avatar} />
+          <View style={UserStyles.editIcon}><Ionicons name="camera" size={20} color="#fff" /></View>
         </TouchableOpacity>
       </View>
-      <View style={styles.section}>
-        <Text style={styles.label}>Ảnh cover</Text>
-        <TouchableOpacity style={styles.coverPicker} onPress={() => pickImage('cover')} disabled={loading}>
+      <View style={UserStyles.section}>
+        <Text style={UserStyles.label}>Ảnh cover</Text>
+        <TouchableOpacity style={UserStyles.coverPicker} onPress={() => pickImage('cover')} disabled={loading}>
           {cover ? (
-            <Image source={{ uri: cover }} style={styles.cover} />
+            <Image source={{ uri: cover }} style={UserStyles.cover} />
           ) : (
-            <View style={styles.coverPlaceholder}><Ionicons name="image" size={32} color="#bbb" /></View>
+            <View style={UserStyles.coverPlaceholder}><Ionicons name="image" size={32} color="#bbb" /></View>
           )}
-          <View style={styles.editIconCover}><Ionicons name="camera" size={20} color="#fff" /></View>
+          <View style={UserStyles.editIconCover}><Ionicons name="camera" size={20} color="#fff" /></View>
         </TouchableOpacity>
       </View>
       {loading && <ActivityIndicator size="large" color="#222" style={{ marginTop: 16 }} />}
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingTop:40,
-    paddingHorizontal: 24,
-  },
-  backButton: {
-    position: 'absolute',
-    left: 16,
-    zIndex: 10,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 32,
-  },
-  section: {
-    marginBottom: 32,
-    alignItems: 'center',
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  avatarPicker: {
-    position: 'relative',
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  editIcon: {
-    position: 'absolute',
-    bottom: 8,
-    right: 8,
-    backgroundColor: '#222',
-    borderRadius: 16,
-    padding: 4,
-  },
-  coverPicker: {
-    position: 'relative',
-    width: '100%',
-    height: 120,
-    borderRadius: 10,
-    overflow: 'hidden',
-    borderWidth: 2,
-    borderColor: '#eee',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cover: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-    borderRadius: 10,
-  },
-  coverPlaceholder: {
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 10,
-  },
-  editIconCover: {
-    position: 'absolute',
-    bottom: 8,
-    right: 16,
-    backgroundColor: '#222',
-    borderRadius: 16,
-    padding: 4,
-  },
-});

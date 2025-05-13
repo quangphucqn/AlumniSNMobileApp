@@ -10,11 +10,10 @@ import styles from './AdminStyles';
 function formatVNTime(isoString) {
   if (!isoString) return '';
   const date = new Date(isoString);
-  // Chuyển sang UTC+7
-  date.setHours(date.getHours() + 7 - date.getTimezoneOffset() / 60);
   const pad = n => n < 10 ? '0' + n : n;
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
 
 export default function SetTimeTeacher() {
   const navigation = useNavigation();

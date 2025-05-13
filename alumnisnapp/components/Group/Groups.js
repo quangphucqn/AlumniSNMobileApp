@@ -1,25 +1,45 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, TextInput, ActivityIndicator, Alert, Animated } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import groupStyles from './GroupStyles';
+import Swipeable from 'react-native-gesture-handler/Swipeable';
 
-function ProgressCircle({ percent, color }) {
-  // percent: 0..1
-  const size = 38;
-  const strokeWidth = 4;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-  const progress = circumference * (1 - percent);
+// function ProgressCircle({ percent, color }) {
+//   // percent: 0..1
+//   const size = 38;
+//   const strokeWidth = 4;
+//   const radius = (size - strokeWidth) / 2;
+//   const circumference = 2 * Math.PI * radius;
+//   const progress = circumference * (1 - percent);
+//   return (
+//     <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+//       {/* Nếu muốn vẽ progress thực sự, dùng react-native-svg hoặc thư viện progress circle */}
+//       <Text style={{ position: 'absolute', fontWeight: 'bold', fontSize: 13, color }}>{Math.round(percent * 100)}%</Text>
+//     </View>
+//   );
+// }
+
+const GROUP_ROW_HEIGHT = 64; // hoặc đúng với style groupRow
+const renderRightActionsGroup = (progress, dragX, onDelete) => {
+  const trans = dragX.interpolate({
+    inputRange: [-100, 0],
+    outputRange: [0, 80],
+    extrapolate: 'clamp',
+  });
   return (
-    <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
-      {/* Nếu muốn vẽ progress thực sự, dùng react-native-svg hoặc thư viện progress circle */}
-      <Text style={{ position: 'absolute', fontWeight: 'bold', fontSize: 13, color }}>{Math.round(percent * 100)}%</Text>
+    <View style={{ width: 80, height: '100%', justifyContent: 'center', alignItems: 'flex-end', overflow: 'visible' }}>
+      <Animated.View style={{ transform: [{ translateX: trans }], height: '100%', width: 80, justifyContent: 'center', alignItems: 'center' }}>
+        <TouchableOpacity style={[groupStyles.deleteGroupBtn]} onPress={onDelete}>
+          <Text style={groupStyles.deleteText}>Xóa</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </View>
   );
-}
+};
 
 export default function Groups() {
   const navigation = useNavigation();
@@ -81,15 +101,35 @@ export default function Groups() {
     fetchGroups(search.trim(), 1, false);
   };
 
+  const handleDeleteGroup = (group) => {
+
+    Alert.alert('Xóa nhóm', `Bạn muốn xóa nhóm: ${group.group_name}?`, [
+      { text: 'Huỷ', style: 'cancel' },
+      {
+        text: 'Xoá', style: 'destructive', onPress: async () => {
+          try {
+            const token = await AsyncStorage.getItem('access_token');
+            await api.deleteGroup(token, group.id);
+            fetchGroups(search.trim(), 1, false);
+          } catch (e) {
+            Alert.alert('Lỗi', 'Không thể xoá nhóm!');
+          } finally {
+            Alert.alert('Thành công', 'Đã xóa nhóm!');
+          }
+        }
+      }
+    ]);
+  };
+
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <TouchableOpacity style={[styles.backBtn, { marginTop: insets.top + 2 }]} onPress={() => navigation.goBack()}>
+    <SafeAreaView style={groupStyles.container} edges={['top', 'left', 'right']}>
+      <TouchableOpacity style={[groupStyles.backBtn, { marginTop: insets.top + 2 }]} onPress={() => navigation.goBack()}>
         <Ionicons name="chevron-back" size={28} color="#222" />
       </TouchableOpacity>
-      <Text style={styles.title}>Nhóm</Text>
-      <View style={styles.searchBar}>
+      <Text style={groupStyles.title}>Danh sách nhóm</Text>
+      <View style={groupStyles.searchBar}>
         <TextInput
-          style={styles.input}
+          style={groupStyles.input}
           placeholder="Tìm kiếm nhóm..."
           value={search}
           onChangeText={setSearch}
@@ -101,18 +141,25 @@ export default function Groups() {
       <FlatList
         data={data}
         keyExtractor={item => item.id?.toString()}
-        contentContainerStyle={{ paddingBottom: 80 }}
+        contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 80 }}
         renderItem={({ item }) => (
-          <View style={[styles.groupRow, { backgroundColor: item.color || '#f6f7fb' }]}> 
-            <View style={styles.iconBox}>
-              {/* icon: nếu có trường icon, render tương ứng, nếu không thì mặc định */}
-              <Ionicons name="people" size={28} color="#3b82f6" />
-            </View>
-            <View style={styles.infoCol}>
-              <Text style={styles.groupName} numberOfLines={1} ellipsizeMode="tail">{item.group_name}</Text>
-              <Text style={styles.taskCount}>{item.user_count || 0} Thành viên</Text>
-            </View>
-          </View>
+          <Swipeable
+            renderRightActions={(progress, dragX) =>
+              renderRightActionsGroup(progress, dragX, () => handleDeleteGroup(item))
+            }
+          >
+            <TouchableOpacity onPress={() => navigation.navigate('GroupDetail', { groupId: item.id })} activeOpacity={0.8}>
+              <View style={groupStyles.groupRow}>
+                <View style={groupStyles.iconBox}>
+                  <Ionicons name="people" size={28} color="#3b82f6" />
+                </View>
+                <View style={groupStyles.infoCol}>
+                  <Text style={groupStyles.groupName} numberOfLines={1} ellipsizeMode="tail">{item.group_name}</Text>
+                  <Text style={groupStyles.taskCount}>{item.user_count || 0} Thành viên</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+          </Swipeable>
         )}
         showsVerticalScrollIndicator={false}
         onEndReached={handleLoadMore}
@@ -122,115 +169,9 @@ export default function Groups() {
         ListFooterComponent={isLoadingMore ? <ActivityIndicator size="small" color="#3b82f6" /> : null}
         ListEmptyComponent={!loading && <Text style={{ textAlign: 'center', marginTop: 32, color: '#888' }}>Không có nhóm nào</Text>}
       />
-      <TouchableOpacity style={styles.fab} activeOpacity={0.8}>
+      <TouchableOpacity style={groupStyles.fab} activeOpacity={0.8} onPress={() => navigation.navigate('CreateGroup')}>
         <Ionicons name="add" size={32} color="#fff" />
       </TouchableOpacity>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 0,
-  },
-  backBtn: {
-    marginLeft: 8,
-    marginBottom: 0,
-    alignSelf: 'flex-start',
-    position: 'absolute',
-    zIndex: 10,
-    top: 0,
-    left: 0,
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#222',
-    marginTop: 24,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f6f7fb',
-    borderRadius: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-  },
-  input: {
-    flex: 1,
-    fontSize: 16,
-    color: '#222',
-    paddingVertical: 4,
-  },
-  groupRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 18,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  infoCol: {
-    flex: 1,
-    justifyContent: 'center',
-    minWidth: 0,
-  },
-  groupName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 2,
-  },
-  taskCount: {
-    fontSize: 13,
-    color: '#666',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    left: '50%',
-    marginLeft: -32,
-    marginBottom: 10,
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: 'blue',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
-  },
-});

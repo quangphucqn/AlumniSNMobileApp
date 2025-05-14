@@ -7,6 +7,8 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default function CreateTeacher() {
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -16,6 +18,7 @@ export default function CreateTeacher() {
   const [avatar, setAvatar] = useState(null); // uri
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
+
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -64,71 +67,74 @@ export default function CreateTeacher() {
       Alert.alert('Thành công', 'Tạo tài khoản giảng viên thành công!');
       navigation.goBack();
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
-        setErrorMsg(error.response.data.message);
+      if (error.response && error.response.status === 400) {
+        if (error.response.data.email) {
+          setErrorMsg('Email đã đã được sử dụng!');
+        } else {
+          setErrorMsg('Đã có lỗi xảy ra, vui lòng thử lại!');
+        }
       } else {
-        console.log(error);
         setErrorMsg('Đã có lỗi xảy ra, vui lòng thử lại!');
       }
     } finally {
-      setLoading(false);
-    }
-  };
+    setLoading(false);
+  }
+};
 
-  return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
-      {/* Back Button */}
-      <TouchableOpacity
-        style={[styles.backButton, { top: insets.top + 8 }]}
-        onPress={() => navigation.goBack()}
-      >
-        <Ionicons name="chevron-back" size={28} color="#222" />
+return (
+  <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
+    {/* Back Button */}
+    <TouchableOpacity
+      style={[styles.backButton, { top: insets.top + 8 }]}
+      onPress={() => navigation.goBack()}
+    >
+      <Ionicons name="chevron-back" size={28} color="#222" />
+    </TouchableOpacity>
+    <View style={[styles.container, { marginTop: 40 }]}>
+      <Text style={styles.title}>Tạo tài khoản giảng viên</Text>
+      <TouchableOpacity style={styles.avatarPicker} onPress={pickImage} activeOpacity={0.8}>
+        {avatar ? (
+          <Image source={{ uri: avatar.uri }} style={styles.avatar} />
+        ) : (
+          <Ionicons name="camera" size={40} color="#888" />
+        )}
       </TouchableOpacity>
-      <View style={[styles.container, { marginTop: 40 }]}>
-        <Text style={styles.title}>Tạo tài khoản giảng viên</Text>
-        <TouchableOpacity style={styles.avatarPicker} onPress={pickImage} activeOpacity={0.8}>
-          {avatar ? (
-            <Image source={{ uri: avatar.uri }} style={styles.avatar} />
-          ) : (
-            <Ionicons name="camera" size={40} color="#888" />
-          )}
-        </TouchableOpacity>
-        <TextInput
-          style={styles.input}
-          placeholder="Họ"
-          value={lastname}
-          onChangeText={setLastname}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Tên"
-          value={firstname}
-          onChangeText={setFirstname}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Email giảng viên"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
-        <TouchableOpacity
-          style={[styles.createButton, loading && { opacity: 0.7 }]}
-          onPress={handleCreate}
-          disabled={loading}
-          activeOpacity={0.8}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" />
-          ) : (
-            <Text style={styles.createButtonText}>Tạo tài khoản</Text>
-          )}
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
-  );
+      <TextInput
+        style={styles.input}
+        placeholder="Họ"
+        value={lastname}
+        onChangeText={setLastname}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Tên"
+        value={firstname}
+        onChangeText={setFirstname}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Email giảng viên"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
+      {errorMsg ? <Text style={styles.error}>{errorMsg}</Text> : null}
+      <TouchableOpacity
+        style={[styles.createButton, loading && { opacity: 0.7 }]}
+        onPress={handleCreate}
+        disabled={loading}
+        activeOpacity={0.8}
+      >
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.createButtonText}>Tạo tài khoản</Text>
+        )}
+      </TouchableOpacity>
+    </View>
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({

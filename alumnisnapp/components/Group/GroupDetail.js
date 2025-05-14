@@ -149,7 +149,7 @@ export default function GroupDetail() {
         {loading && (
           <ActivityIndicator size={18} color="#3b82f6" style={{ marginLeft: 8 }} />
         )}
-        <TouchableOpacity onPress={() => navigation.navigate('AddUser', { groupId })} style={{ marginLeft: 8 }}>
+        <TouchableOpacity onPress={() => navigation.navigate('AddUser', { groupId, existingUserIds: users.map(u => u.id) })} style={{ marginLeft: 8 }}>
           <Ionicons name="add-circle-outline" size={28} color="#2563eb" />
         </TouchableOpacity>
       </View>

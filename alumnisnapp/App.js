@@ -26,6 +26,7 @@ import CreateGroupScreen from './components/Group/CreateGroup';
 import AddUserScreen from './components/Group/AddUser';
 import ManageUsersScreen from './components/Admin/ManageUser';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 

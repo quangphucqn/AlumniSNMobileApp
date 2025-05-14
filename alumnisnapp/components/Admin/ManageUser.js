@@ -86,8 +86,8 @@ export default function ManageUser() {
 
   const renderRightActions = (progress, dragX, onDelete) => (
     <View style={{ width: 80, height: '100%', justifyContent: 'center', alignItems: 'flex-end', overflow: 'visible' }}>
-      <TouchableOpacity style={[groupStyles.deleteUserBtn, { height: '90%' }]} onPress={onDelete}>
-        <Text style={groupStyles.deleteText}>Xoá</Text>
+      <TouchableOpacity style={styles.deleteUserBtnUser} onPress={onDelete}>
+        <Text style={styles.deleteTextUser}>Xoá</Text>
       </TouchableOpacity>
     </View>
   );
@@ -96,7 +96,7 @@ export default function ManageUser() {
     <Swipeable
       renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, () => handleDeleteUser(item))}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#fff', borderRadius: 10, marginBottom: 8, elevation: 1 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: 70, paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#fff', borderRadius: 10, marginBottom: 2, elevation: 1 }}>
         <Image source={{ uri: item.avatar || 'https://via.placeholder.com/100' }} style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12, backgroundColor: '#eee' }} />
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: 'bold', color: '#222' }}>{item.last_name} {item.first_name}</Text>
@@ -157,20 +157,20 @@ export default function ManageUser() {
         animationType="none"
         onRequestClose={closeRoleModal}
       >
-        <Animated.View style={{ flex: 1, backgroundColor: modalOpacity.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)'] }), justifyContent: 'center', alignItems: 'center' }}>
-          <Animated.View style={{ width: 280, backgroundColor: '#fff', borderRadius: 16, paddingVertical: 18, paddingHorizontal: 12, opacity: modalOpacity, transform: [{ scale: modalOpacity.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }}>
-            <Text style={{ fontWeight: 'bold', fontSize: 17, marginBottom: 10, textAlign: 'center' }}>Chọn vai trò</Text>
+        <Animated.View style={[styles.roleModalContainer, { backgroundColor: modalOpacity.interpolate({ inputRange: [0, 1], outputRange: ['rgba(0,0,0,0)', 'rgba(0,0,0,0.25)'] }) }] }>
+          <Animated.View style={[styles.roleModalBox, { opacity: modalOpacity, transform: [{ scale: modalOpacity.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }] }>
+            <Text style={styles.roleModalTitle}>Chọn vai trò</Text>
             {ROLE_OPTIONS.map(opt => (
               <TouchableOpacity
                 key={opt.value}
-                style={{ paddingVertical: 10, borderRadius: 10, backgroundColor: role === opt.value ? '#2563eb' : '#f3f4f6', marginBottom: 6, alignItems: 'center' }}
+                style={[styles.roleOption, role === opt.value && styles.roleOptionSelected]}
                 onPress={() => handleSelectRole(opt.value)}
               >
-                <Text style={{ color: role === opt.value ? '#fff' : '#222', fontWeight: 'bold', fontSize: 15 }}>{opt.label}</Text>
+                <Text style={[styles.roleOptionText, role === opt.value && styles.roleOptionTextSelected]}>{opt.label}</Text>
               </TouchableOpacity>
             ))}
-            <TouchableOpacity onPress={closeRoleModal} style={{ marginTop: 8, alignItems: 'center' }}>
-              <Text style={{ color: '#2563eb', fontWeight: 'bold', fontSize: 15 }}>Đóng</Text>
+            <TouchableOpacity onPress={closeRoleModal} style={styles.roleModalCloseBtn}>
+              <Text style={styles.roleModalCloseText}>Đóng</Text>
             </TouchableOpacity>
           </Animated.View>
         </Animated.View>

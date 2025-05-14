@@ -7,6 +7,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
 
+const CLIENT_ID = 'rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb';
+const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO';
+
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
@@ -76,12 +79,13 @@ export default function Login({ navigation, route }) {
     }
     try {
       setLoading(true);
-      const loginData = {
-        username: username,
-        password: password,
-        grant_type: 'password'
-      };
-      const response = await api.login(loginData);
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('grant_type', 'password');
+      formData.append('client_id', CLIENT_ID);
+      formData.append('client_secret', CLIENT_SECRET);
+      const response = await api.login(formData);
       if (response.data.access_token) {
         await AsyncStorage.setItem('access_token', response.data.access_token);
         await AsyncStorage.setItem('refresh_token', response.data.refresh_token);

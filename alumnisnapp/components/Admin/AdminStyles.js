@@ -118,6 +118,76 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
   },
+  deleteUserBtnUser: {
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 70,
+    height: '96%',
+    borderRadius: 14,
+    marginVertical: 0,
+    marginRight: 10,
+    marginTop: 10,
+    marginBottom: 11,
+    marginLeft: 0,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  deleteTextUser: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  roleModalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  roleModalBox: {
+    width: 280,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+  },
+  roleModalTitle: {
+    fontWeight: 'bold',
+    fontSize: 17,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  roleOption: {
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: '#f3f4f6',
+    marginBottom: 6,
+    alignItems: 'center',
+    width: '100%',
+  },
+  roleOptionSelected: {
+    backgroundColor: '#2563eb',
+  },
+  roleOptionText: {
+    color: '#222',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  roleOptionTextSelected: {
+    color: '#fff',
+  },
+  roleModalCloseBtn: {
+    marginTop: 8,
+    alignItems: 'center',
+  },
+  roleModalCloseText: {
+    color: '#2563eb',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
 });
 
 export default styles; 

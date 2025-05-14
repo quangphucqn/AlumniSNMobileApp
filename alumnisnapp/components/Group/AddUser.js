@@ -10,7 +10,7 @@ import groupStyles from './GroupStyles';
 export default function AddUser() {
   const navigation = useNavigation();
   const route = useRoute();
-  const { groupId } = route.params;
+  const { groupId, existingUserIds = [] } = route.params;
   const insets = useSafeAreaInsets();
   const [search, setSearch] = useState('');
   const [users, setUsers] = useState([]);
@@ -89,18 +89,33 @@ export default function AddUser() {
 
   const renderUser = ({ item }) => {
     const selected = selectedUserIds.includes(item.id);
+    const alreadyInGroup = existingUserIds.includes(item.id);
     return (
       <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8, backgroundColor: selected ? '#e0e7ff' : '#fff', borderRadius: 8, marginBottom: 4 }}
-        onPress={() => toggleSelectUser(item.id)}
-        activeOpacity={0.7}
+        style={{
+          flexDirection: 'row',
+          alignItems: 'center',
+          paddingVertical: 8,
+          paddingHorizontal: 8,
+          backgroundColor: alreadyInGroup ? '#f3f4f6' : (selected ? '#e0e7ff' : '#fff'),
+          borderRadius: 8,
+          marginBottom: 4,
+          opacity: alreadyInGroup ? 0.5 : 1
+        }}
+        onPress={() => !alreadyInGroup && toggleSelectUser(item.id)}
+        activeOpacity={alreadyInGroup ? 1 : 0.7}
+        disabled={alreadyInGroup}
       >
         <Image source={{ uri: item.avatar || 'https://via.placeholder.com/100' }} style={{ width: 36, height: 36, borderRadius: 18, marginRight: 12, backgroundColor: '#eee' }} />
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: 'bold', color: '#222' }}>{item.last_name} {item.first_name}</Text>
           <Text style={{ color: '#888', fontSize: 13 }}>{item.email}</Text>
         </View>
-        <Ionicons name={selected ? 'checkbox' : 'square-outline'} size={24} color={selected ? '#2563eb' : '#bbb'} />
+        {alreadyInGroup ? (
+          <Ionicons name="checkmark-circle" size={24} color="#bbb" />
+        ) : (
+          <Ionicons name={selected ? 'checkbox' : 'square-outline'} size={24} color={selected ? '#2563eb' : '#bbb'} />
+        )}
       </TouchableOpacity>
     );
   };

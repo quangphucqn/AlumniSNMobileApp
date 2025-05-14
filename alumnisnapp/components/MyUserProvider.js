@@ -13,6 +13,7 @@ export default function MyUserProvider({ children }) {
       dispatch({ type: 'setLoading', payload: true });
       try {
         const token = await AsyncStorage.getItem('access_token');
+        console.log("Token từ AsyncStorage:", token);
         if (token) {
           // Gọi API lấy user mới nhất
           const res = await api.getCurrentUser(token);

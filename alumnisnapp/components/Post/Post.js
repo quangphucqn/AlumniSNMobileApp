@@ -1,43 +1,34 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useEffect, useState, useContext } from "react";
-import { MyUserContext } from "../../configs/Context";
+import React, { useContext, useState } from "react";
 import {
-  ScrollView,
-  Alert,
   View,
-  TextInput,
-  StyleSheet,
-  Image,
   Text,
+  TextInput,
+  Image,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  SafeAreaView,
+  StatusBar,
 } from "react-native";
-import { Button } from "react-native-paper";
+import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MyUserContext } from "../../configs/Context";
 import { endpoints } from "../../configs/API";
 import axios from "../../configs/API";
-import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
 
-const CreatePostScreen = ({ route }) => {
-  const { state, dispatch } = useContext(MyUserContext);
+const CreatePostScreen = () => {
+  const navigation = useNavigation();
+  const { state } = useContext(MyUserContext);
   const user = state.user;
+
   const [content, setContent] = useState("");
   const [images, setImages] = useState([]);
-  const [surveyType, setSurveyType] = useState("");
-  const [endTime, setEndTime] = useState("");
-  const [questions, setQuestions] = useState([
-    { question: "", options: [{ option: "" }] },
-  ]);
-  const [hideSurveyButton, setHideSurveyButton] = useState(false);
-  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (route.params?.surveyType) setSurveyType(route.params.surveyType);
-    if (route.params?.endTime) setEndTime(new Date(route.params.endTime));
-    if (route.params?.questions) setQuestions(route.params.questions);
-    if (route.params?.hideSurveyButton)
-      setHideSurveyButton(route.params.hideSurveyButton);
-  }, [route.params]);
+  const isPostButtonEnabled = content.trim() !== "" || images.length > 0;
 
   const pickImages = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -57,26 +48,19 @@ const CreatePostScreen = ({ route }) => {
 
   const getToken = async () => {
     try {
-      const token = await AsyncStorage.getItem("access_token");
-      if (token) {
-        return token;
-      } else {
-        throw new Error("Không tìm thấy token.");
-      }
+      return await AsyncStorage.getItem("access_token");
     } catch (error) {
-      console.error("Lỗi khi lấy token:", error);
+      console.error("Lỗi lấy token:", error);
       return null;
     }
   };
 
   const submitPost = async () => {
-    if (loading) return;
-    if (!content) {
-      Alert.alert("Đăng bài", "Vui lòng nhập nội dung bài viết.");
-      return;
-    }
+    if (loading || !isPostButtonEnabled) return;
 
     const token = await getToken();
+    if (!token) return Alert.alert("Lỗi", "Không tìm thấy token.");
+
     const formData = new FormData();
     formData.append("content", content);
 
@@ -88,203 +72,178 @@ const CreatePostScreen = ({ route }) => {
       });
     });
 
-    const isSurveyTypeValid = surveyType !== "";
-    const isEndTimeValid = endTime instanceof Date && !isNaN(endTime);
-    const areQuestionsValid =
-      Array.isArray(questions) &&
-      questions.length > 0 &&
-      questions.every(
-        (q) =>
-          q.question !== "" && Array.isArray(q.options) && q.options.length > 0
-      );
-
     try {
       setLoading(true);
-      let endpoint = endpoints.post;
-
-      if (isSurveyTypeValid && isEndTimeValid && areQuestionsValid) {
-        formData.append("survey_type", surveyType);
-        formData.append("end_time", endTime.toISOString());
-        formData.append("questions", JSON.stringify(questions));
-        endpoint = endpoints.survey;
-      }
-
-      const response = await axios.post(endpoint, formData, {
+      const res = await axios.post(endpoints.post, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (response.status === 201) {
+      if (res.status === 201) {
         Alert.alert("Đăng bài thành công!");
-        navigation.navigate("HomeStack", { screen: "HomeScreen" });
+        navigation.navigate("Home");
       } else {
-        Alert.alert("Đăng bài không thành công");
+        Alert.alert("Lỗi", "Không thể đăng bài.");
       }
-    } catch (error) {
-      console.error("Error submitting post:", error);
-      Alert.alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+    } catch (err) {
+      console.error(err);
+      Alert.alert("Lỗi khi đăng bài.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        <View style={styles.post}>
-          <Image
-            source={{ uri: user.avatar || "https://via.placeholder.com/150" }}
-            style={styles.avatar}
-          />
-          <View>
-            {user.role === 0 ? (
-              <Text style={styles.username}>Quản Trị Viên</Text>
-            ) : (
-              <Text style={styles.username}>
-                {user.first_name} {user.last_name}
-              </Text>
-            )}
-          </View>
-        </View>
-        <TextInput
-          style={styles.input}
-          multiline
-          placeholder="Nhập nội dung bài viết..."
-          value={content}
-          onChangeText={setContent}
-        />
-        <ScrollView horizontal style={styles.imageScrollView}>
-          {images.map((image, index) => (
-            <View key={index} style={styles.imageContainer}>
-              <Image source={{ uri: image.uri }} style={styles.image} />
-              <Ionicons
-                name="close-circle"
-                size={30}
-                color="black"
-                style={styles.deleteIcon}
-                onPress={() => deleteImage(index)}
-              />
-            </View>
-          ))}
-        </ScrollView>
-      </ScrollView>
-      <View style={styles.buttonContainer}>
-        <Button
-          style={styles.pickImagesButton}
-          mode="outlined"
-          onPress={pickImages}
-        >
-          Chọn ảnh
-        </Button>
-        {!hideSurveyButton && user.role === 0 && (
-          <Button
-            style={styles.createSurveyButton}
-            mode="outlined"
-            onPress={() =>
-              navigation.navigate("CreateSurveyScreen", {
-                surveyType,
-                endTime,
-                questions,
-              })
-            }
+    <SafeAreaView style={[styles.safeArea, { paddingTop: StatusBar.currentHeight }]}>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.container}>
+        {/* HEADER */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={24} color="black" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Tạo bài viết</Text>
+          <TouchableOpacity
+            onPress={submitPost}
+            disabled={!isPostButtonEnabled}
           >
-            Tạo khảo sát
-          </Button>
-        )}
-        <Button
-          style={styles.submitButton}
-          loading={loading}
-          mode="contained"
-          onPress={submitPost}
-        >
-          Đăng bài
-        </Button>
+            <Text
+              style={[
+                styles.postButton,
+                { color: isPostButtonEnabled ? "#007BFF" : "#ccc" },
+              ]}
+            >
+              ĐĂNG
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.scrollView}>
+          {/* User Info */}
+          <View style={styles.userRow}>
+            <Image
+              source={{ uri: user.avatar || "https://via.placeholder.com/150" }}
+              style={styles.avatar}
+            />
+            <Text style={styles.username}>
+              {user.role === 0
+                ? "Quản Trị Viên"
+                : `${user.first_name} ${user.last_name}`}
+            </Text>
+          </View>
+
+          {/* Image Button */}
+          <TouchableOpacity style={styles.imageIconButton} onPress={pickImages}>
+            <Ionicons name="image-outline" size={28} color="#28A745" />
+            <Text style={styles.iconText}>Chọn ảnh</Text>
+          </TouchableOpacity>
+
+          {/* TextInput */}
+          <TextInput
+            style={styles.input}
+            multiline
+            placeholder="Bạn đang nghĩ gì?"
+            value={content}
+            onChangeText={setContent}
+          />
+
+          {/* Image preview */}
+          <ScrollView horizontal style={styles.imageScrollView}>
+            {images.map((image, index) => (
+              <View key={index} style={styles.imageContainer}>
+                <Image source={{ uri: image.uri }} style={styles.image} />
+                <Ionicons
+                  name="close-circle"
+                  size={26}
+                  color="black"
+                  style={styles.deleteIcon}
+                  onPress={() => deleteImage(index)}
+                />
+              </View>
+            ))}
+          </ScrollView>
+        </ScrollView>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
 
+export default CreatePostScreen;
+
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
   },
-  post: {
+  header: {
+    height: 55,
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 30,
+    paddingHorizontal: 12,
+    justifyContent: "space-between",
+    borderBottomWidth: 0.5,
+    borderColor: "#ccc",
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  postButton: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  scrollView: {
+    padding: 15,
+  },
+  userRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
   },
   avatar: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
     marginRight: 10,
   },
   username: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginStart: 5,
   },
-  scrollView: {
-    padding: 20,
+  imageIconButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    paddingVertical: 4,
+  },
+  iconText: {
+    fontSize: 16,
+    color: "#28A745",
+    marginLeft: 8,
   },
   input: {
-    padding: 10,
-    minHeight: 50,
+    minHeight: 80,
+    fontSize: 16,
+    paddingTop: 10,
     textAlignVertical: "top",
-    marginBottom: 10,
   },
   imageScrollView: {
-    marginVertical: 10,
-    paddingVertical: 5,
-  },
-  image: {
-    width: 170,
-    height: 170,
-    margin: 5,
-    borderRadius: 8,
-  },
-  buttonContainer: {
-    flexDirection: "column",
-    justifyContent: "space-around",
-    borderTopWidth: 1,
-    borderColor: "black",
-  },
-  submitButton: {
-    borderRadius: 20,
-    backgroundColor: "#007BFF",
-    padding: 10,
-    margin: 20,
-  },
-  pickImagesButton: {
-    borderRadius: 10,
-    borderColor: "#28A745",
-    borderWidth: 2,
-    marginStart: 100,
-    marginEnd: 100,
-    marginBottom: 20,
-    marginTop: 20,
-  },
-  createSurveyButton: {
-    borderRadius: 10,
-    borderColor: "#FFC107",
-    borderWidth: 2,
-    marginStart: 100,
-    marginEnd: 100,
-    marginBottom: 20,
-  },
-  createInvitationButton: {
-    borderRadius: 10,
-    borderColor: "#17A2B8",
-    borderWidth: 2,
-    marginStart: 100,
-    marginEnd: 100,
+    marginVertical: 15,
   },
   imageContainer: {
     position: "relative",
-    marginBottom: 20,
+    marginRight: 10,
+  },
+  image: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
   },
   deleteIcon: {
     position: "absolute",
@@ -292,5 +251,3 @@ const styles = StyleSheet.create({
     right: 5,
   },
 });
-
-export default CreatePostScreen;

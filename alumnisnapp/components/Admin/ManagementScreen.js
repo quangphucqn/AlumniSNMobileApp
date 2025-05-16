@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-
 const features = [
   {
     key: 'verify',
@@ -29,6 +28,10 @@ const features = [
     key: 'users',
     label: 'Quản lý người dùng',
     icon: <Ionicons name="person" size={36} color="blue" />,
+  },{
+    key: 'postservey',
+    label: 'Đăng bài khảo sát',
+    icon: <Ionicons name="paper-plane" size={36} color="#FFCC33" />,
   },
   {
     key: 'eventinvite',
@@ -54,6 +57,7 @@ export default function ManagementScreen() {
               if (item.key === 'change_time') navigation.navigate('SetTimeTeacher');
               if (item.key === 'group') navigation.navigate('Groups');
               if (item.key === 'users') navigation.navigate('ManageUsers');
+              if(item.key==='postservey') navigation.navigate('CreateSurvey');
             }}
           >
             <View style={styles.iconWrapper}>{item.icon}</View>

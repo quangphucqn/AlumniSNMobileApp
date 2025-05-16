@@ -7,8 +7,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
 
-const CLIENT_ID = 'rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb';
-const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO';
+const CLIENT_ID = 'bnuIbu1IttTtWIHvfwJth0gWNTBFcrnNqmDcKZsP';
+const CLIENT_SECRET = 'WgoA9Koer5sIHU5K1D5ZuuHFxBOodVNHQsS1e7ALiQPnUE5xueDXxoL6GT7h14vr90DOzF8MZyS2LHSXirHB2z4YMJwQ0VTaN7aiYbiwy1oyuoy0DBeuPGWV3RC3qn5L';
 
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);

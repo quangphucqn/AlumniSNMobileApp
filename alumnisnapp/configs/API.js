@@ -2,10 +2,11 @@
 
 import axios from "axios";
 
-const CLIENT_ID = "rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb";
-const CLIENT_SECRET ="u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO";
+const CLIENT_ID = "bnuIbu1IttTtWIHvfwJth0gWNTBFcrnNqmDcKZsP";
+const CLIENT_SECRET =
+  "pbkdf2_sha256$1000000$K546kUGlBKo5cpNUXkmBG4$xIxXPNCxe0WgoA9Koer5sIHU5K1D5ZuuHFxBOodVNHQsS1e7ALiQPnUE5xueDXxoL6GT7h14vr90DOzF8MZyS2LHSXirHB2z4YMJwQ0VTaN7aiYbiwy1oyuoy0DBeuPGWV3RC3qn5LWz2TSkRMIS/FpGqjZQcPmRpoRw0oY7xmc=";
 
-const BASE_URL = "http://192.168.1.4:8000";
+const BASE_URL = "http://192.168.0.23:8000";
 // Định nghĩa các endpoints
 export const endpoints = {
   // User endpoints
@@ -22,10 +23,10 @@ export const endpoints = {
   setPasswordResetTime: "/user",
   getTeachersExpiredPassword: "/user/teachers_expired_password_reset/",
   // Post endpoints
-  posts: "/posts/",
+  post: "/post/",
   "post-detail": (postId) => `/post/${postId}/`,
-  myPosts: "/posts/my-posts/",
-  comments: (postId) => `/post/${postId}/comments/`,
+  "my-posts": "/post/my-posts",
+  comments: (postId) => `/post/${postId}/comment/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
   // Comment endpoints
@@ -56,6 +57,7 @@ export const endpoints = {
 
 // Tạo instance axios với token
 export const authAPI = (accessToken) => {
+  console.log("Token in authAPI:", accessToken);
   return axios.create({
     baseURL: BASE_URL,
     headers: {
@@ -63,34 +65,37 @@ export const authAPI = (accessToken) => {
     },
   });
 };
-export const getPostComments = async (postId) => {
-    try {
-        const res = await axios.get(BASE_URL + endpoints.comments(postId));
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching comments:", error);
-        return [];
-    }
+export const getPostComments = async (postId, token) => {
+  try {
+    const res = await authAPI(token).get(endpoints.comments(postId));
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
 };
 
-export const getPostReacts = async (postId) => {
-    try {
-        const res = await axios.get(BASE_URL + endpoints.reacts(postId));
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching reacts:", error);
-        return [];
-    }
+export const getPostReacts = async (postId, accessToken) => {
+  try {
+    const res = await authAPI(accessToken).get(endpoints.reacts(postId));
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching reacts:", error);
+    return [];
+  }
 };
+
 
 export const getSurveyData = async (surveyId) => {
-    try {
-        const res = await axios.get(BASE_URL + endpoints["survey-detail"](surveyId));
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching reacts:", error);
-        return [];
-    }
+  try {
+    const res = await axios.get(
+      BASE_URL + endpoints["survey-detail"](surveyId)
+    );
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching reacts:", error);
+    return [];
+  }
 };
 // API functions
 export const api = {
@@ -98,9 +103,9 @@ export const api = {
   login: (formData) => {
     return axios.post(BASE_URL + endpoints.login, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        'Accept': 'application/json'
-      }
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
     });
   },
   register: (userData) => axios.post(endpoints.register, userData),
@@ -109,44 +114,8 @@ export const api = {
     authAPI(accessToken).get(endpoints.currentUser),
 
   // Post APIs
-  getPosts: (accessToken, params) =>
-    authAPI(accessToken).get(endpoints.posts, { params }),
-  getMyPosts: (accessToken) => authAPI(accessToken).get(endpoints.myPosts),
-  createPost: (accessToken, formData) =>
-    authAPI(accessToken).post(endpoints.posts, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
-  updatePost: (accessToken, id, data) =>
-    authAPI(accessToken).patch(`${endpoints.posts}/${id}/`, data),
-  deletePost: (accessToken, id) =>
-    authAPI(accessToken).delete(`${endpoints.posts}/${id}/`),
-  lockUnlockComments: (accessToken, id) =>
-    authAPI(accessToken).patch(`${endpoints.posts}/${id}/lock-unlock-comment/`),
-
   // Comment APIs
-  createComment: (accessToken, postId, data) =>
-    authAPI(accessToken).post(`${endpoints.posts}/${postId}/comment/`, data),
-  updateComment: (accessToken, id, data) =>
-    authAPI(accessToken).patch(`${endpoints.comments}/${id}/`, data),
-  deleteComment: (accessToken, id) =>
-    authAPI(accessToken).delete(`${endpoints.comments}/${id}/`),
-  replyComment: (accessToken, id, data) =>
-    authAPI(accessToken).post(`${endpoints.comments}/${id}/reply/`, data),
-
   // Survey APIs
-  getSurveys: (accessToken) => authAPI(accessToken).get(endpoints.surveys),
-  createSurvey: (accessToken, data) =>
-    authAPI(accessToken).post(endpoints.surveys, data),
-  updateSurvey: (accessToken, id, data) =>
-    authAPI(accessToken).patch(`${endpoints.surveys}/${id}/`, data),
-  saveDraft: (accessToken, id, data) =>
-    authAPI(accessToken).post(`${endpoints.surveys}/${id}/draft/`, data),
-  submitSurvey: (accessToken, id, data) =>
-    authAPI(accessToken).post(`${endpoints.surveys}/${id}/submit/`, data),
-  resumeSurvey: (accessToken, id) =>
-    authAPI(accessToken).get(`${endpoints.surveys}/${id}/resume/`),
 
   // Group APIs
   getGroups: (accessToken, q, page = 1) =>

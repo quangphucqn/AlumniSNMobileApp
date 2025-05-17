@@ -40,11 +40,13 @@ const Home = () => {
       try {
         let url = `${endpoints["post"]}?page=${page}`;
         if (q) url = `${url}&q=${q}`;
+        console.log("Fetching posts from:", url);
         let res = await authAPI(token).get(url);
+        console.log("Response data:", res.data);
         setPosts(page > 1 ? [...posts, ...res.data.results] : res.data.results);
         if (res.data.next === null) setPage(0);
       } catch (ex) {
-        console.error(ex);
+        console.error("Error in loadPosts:", ex);
       } finally {
         setLoading(false);
       }
@@ -53,6 +55,7 @@ const Home = () => {
 
   useEffect(() => {
     if (token) {
+      console.log("Searching with q =", q, "and page =", page);
       let timer = setTimeout(() => loadPosts(), 500);
       return () => clearTimeout(timer);
     }
@@ -62,9 +65,9 @@ const Home = () => {
     if (page > 0 && !loading) setPage(page + 1);
   };
 
-  const search = (value, callback) => {
+  const search = (value) => {
+    setQ(value);
     setPage(1);
-    callback(value);
   };
 
   const refresh = () => {
@@ -111,11 +114,11 @@ const Home = () => {
   return (
     <View>
       <Searchbar
-        placeholder="Tìm kiếm bài viết..."
-        onChangeText={(t) => search(t, setQ)}
-        value={q}
-        style={styles.searchBar}
-      />
+  placeholder="Tìm kiếm bài viết..."
+  onChangeText={search}
+  value={q}
+  style={styles.searchBar}
+/>
       {posts.length === 0 && !loading ? (
         <Text style={styles.noPostsText}>Không có kết quả tìm kiếm nào</Text>
       ) : (

@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState, useContext } from "react";
 import { MyUserContext } from "../../configs/Context";
-import { Platform } from "react-native";
 import {
   ScrollView,
   Alert,
@@ -29,6 +28,7 @@ const UpdatePost = ({ route }) => {
   const [images, setImages] = useState([]);
   const [surveyType, setSurveyType] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [token, setToken] = useState(null);
   const [questions, setQuestions] = useState([
     {
       id: "",
@@ -68,7 +68,10 @@ const UpdatePost = ({ route }) => {
         route.params.origin === "HomeScreen"
       ) {
         const fetchSurvey = async () => {
-          const surveyData = await getSurveyData(post.id);
+          const storedToken = await AsyncStorage.getItem("access_token");
+          console.log("Token:", storedToken);
+          setToken(storedToken);
+          const surveyData = await getSurveyData(post.id,storedToken);
           setSurveyType(surveyData.survey_type);
           setEndTime(new Date(surveyData.end_time));
           setQuestions(surveyData.questions);
@@ -107,63 +110,62 @@ const UpdatePost = ({ route }) => {
   };
 
   const submitPost = async () => {
-  if (loading || !content) {
-    Alert.alert("Cập nhật bài viết", "Vui lòng nhập nội dung bài viết.");
-    return;
-  }
-
-  const token = await getToken();
-  const formData = new FormData();
-  formData.append("content", content);
-
-  const newImage = images.find(img => !img.id);
-  if (newImage) {
-    const uri = newImage.uri;  // giữ nguyên file://
-    formData.append("image", {
-      uri,
-      type: "image/jpeg",  // hoặc png nếu ảnh png
-      name: "image.jpg",
-    });
-  } else if (images.length === 0) {
-    // Gửi image = "" để backend biết xóa ảnh
-    formData.append("image", "");
-  }
-
-  // Debug log
-  for (let pair of formData.entries()) {
-    console.log(pair[0], pair[1]);
-  }
-
-  try {
-    setLoading(true);
-    const url = endpoints["post-detail"](post.id);
-
-    const response = await axios.put(url, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.status === 200) {
-      Alert.alert("Đăng bài thành công!");
-      navigation.navigate("HomeStack", { screen: "HomeScreen" });
-    } else {
-      Alert.alert("Đăng bài không thành công");
+    if (loading || !content) {
+      Alert.alert("Cập nhật bài viết", "Vui lòng nhập nội dung bài viết.");
+      return;
     }
-  } catch (error) {
-    if (error.response) {
-      console.error("Server responded with:", error.response.data);
-      Alert.alert("Lỗi từ server:", JSON.stringify(error.response.data));
-    } else {
-      console.error("Error submitting post:", error.message);
-      Alert.alert("Đã xảy ra lỗi. Vui lòng thử lại.");
-    }
-  } finally {
-    setLoading(false);
-  }
-};
 
+    const token = await getToken();
+    const formData = new FormData();
+    formData.append("content", content);
+
+    const newImage = images.find((img) => !img.id);
+    if (newImage) {
+      const uri = newImage.uri; // giữ nguyên file://
+      formData.append("image", {
+        uri,
+        type: "image/jpeg", // hoặc png nếu ảnh png
+        name: "image.jpg",
+      });
+    } else if (images.length === 0) {
+      // Gửi image = "" để backend biết xóa ảnh
+      formData.append("image", "");
+    }
+
+    // Debug log
+    for (let pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
+    }
+
+    try {
+      setLoading(true);
+      const url = endpoints["post-detail"](post.id);
+
+      const response = await axios.put(url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        Alert.alert("Đăng bài thành công!");
+        navigation.navigate("Home");
+      } else {
+        Alert.alert("Đăng bài không thành công");
+      }
+    } catch (error) {
+      if (error.response) {
+        console.error("Server responded with:", error.response.data);
+        Alert.alert("Lỗi từ server:", JSON.stringify(error.response.data));
+      } else {
+        console.error("Error submitting post:", error.message);
+        Alert.alert("Đã xảy ra lỗi. Vui lòng thử lại.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>

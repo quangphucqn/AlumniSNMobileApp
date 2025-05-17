@@ -1,28 +1,37 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl } from 'react-native';
-import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { api } from '../../configs/API';
-import { MyUserContext } from '../../configs/Context';
-import UserStyles from './UserStyles';
+import React, { useState, useEffect, useContext } from "react";
+import {
+  StyleSheet,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+  RefreshControl,
+} from "react-native";
+import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import { createDrawerNavigator } from "@react-navigation/drawer";
+import { api } from "../../configs/API";
+import { MyUserContext } from "../../configs/Context";
+import UserStyles from "./UserStyles";
+import ProfileScreen from "../User/ProfileScreen";
 
 // Component cho Drawer Content
 function DrawerContent({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useContext(MyUserContext);
+
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      // Chỉ xóa access_token và refresh_token khi logout
-      await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
-      
-      dispatch({ type: 'logout' })
+      await AsyncStorage.multiRemove(["access_token", "refresh_token"]);
+      dispatch({ type: "logout" });
     } catch (error) {
-      console.error('Logout error:', error);
-      Alert.alert('Lỗi', 'Có lỗi xảy ra khi đăng xuất');
+      console.error("Logout error:", error);
+      Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng xuất");
     } finally {
       setIsLoading(false);
     }
@@ -31,18 +40,21 @@ function DrawerContent({ navigation }) {
   const handleChangePassword = () => {
     navigation.closeDrawer();
     setTimeout(() => {
-      navigation.getParent()?.navigate('ChangePassword');
+      navigation.getParent()?.navigate("ChangePassword");
     }, 300);
   };
 
   return (
     <View style={UserStyles.drawerContainer}>
-      <SafeAreaView edges={['top', 'right', 'left']} style={UserStyles.safeArea}>
+      <SafeAreaView
+        edges={["top", "right", "left"]}
+        style={UserStyles.safeArea}
+      >
         <View style={UserStyles.drawerHeader}>
           <Text style={UserStyles.drawerTitle}>Cài đặt</Text>
         </View>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={UserStyles.drawerItem}
           onPress={handleChangePassword}
           disabled={isLoading}
@@ -53,14 +65,16 @@ function DrawerContent({ navigation }) {
           </View>
         </TouchableOpacity>
 
-        <TouchableOpacity 
+        <TouchableOpacity
           style={UserStyles.drawerItem}
           onPress={handleLogout}
           disabled={isLoading}
         >
           <View style={UserStyles.drawerItemLeft}>
             <Ionicons name="log-out-outline" size={24} color="#ff3b30" />
-            <Text style={[UserStyles.drawerItemText, { color: '#ff3b30' }]}>Đăng xuất</Text>
+            <Text style={[UserStyles.drawerItemText, { color: "#ff3b30" }]}>
+              Đăng xuất
+            </Text>
           </View>
         </TouchableOpacity>
       </SafeAreaView>
@@ -73,22 +87,20 @@ function ProfileContent() {
   const { state, dispatch } = useContext(MyUserContext);
   const user = state.user;
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState("posts"); // ✅ THÊM useState CHỖ NÀY
 
-  // Hàm lấy user mới nhất từ server và cập nhật vào context
   const loadUserData = async () => {
     try {
-      const accessToken = await AsyncStorage.getItem('access_token');
+      const accessToken = await AsyncStorage.getItem("access_token");
       if (accessToken) {
-        // Gọi API lấy user mới nhất và cập nhật vào context
         const res = await api.getCurrentUser(accessToken);
-        dispatch({ type: 'login', payload: res.data });
+        dispatch({ type: "login", payload: res.data });
       } else {
-        // Nếu không có token thì logout
-        dispatch({ type: 'logout' });
+        dispatch({ type: "logout" });
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
-      dispatch({ type: 'logout' });
+      console.error("Error loading user data:", error);
+      dispatch({ type: "logout" });
     }
   };
 
@@ -107,7 +119,10 @@ function ProfileContent() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }} edges={['top', 'left', 'right']}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      edges={["top", "left", "right"]}
+    >
       <ScrollView
         contentContainerStyle={{ paddingBottom: 80 }}
         refreshControl={
@@ -122,7 +137,10 @@ function ProfileContent() {
             <View style={UserStyles.coverPlaceholder} />
           )}
           <View style={UserStyles.avatarWrapper}>
-            <Image source={{ uri: user.avatar || 'https://via.placeholder.com/150' }} style={UserStyles.avatarImage} />
+            <Image
+              source={{ uri: user.avatar || "https://via.placeholder.com/150" }}
+              style={UserStyles.avatarImage}
+            />
           </View>
           <View style={UserStyles.headerAbsolute}>
             <TouchableOpacity onPress={() => navigation.openDrawer()}>
@@ -130,35 +148,79 @@ function ProfileContent() {
             </TouchableOpacity>
           </View>
         </View>
-        {/* InfoRow dưới cover, tránh bị nút che */}
+
         <View style={UserStyles.infoRow}>
-          <Text style={UserStyles.profileName}>{user.last_name} {user.first_name}</Text>
+          <Text style={UserStyles.profileName}>
+            {user.last_name} {user.first_name}
+          </Text>
           <Text style={UserStyles.profileEmail}>{user.email}</Text>
         </View>
-        {/* Nội dung cuộn */}
+
         <View style={UserStyles.buttonRow}>
-          <TouchableOpacity style={UserStyles.actionButton} onPress={() => navigation.navigate('EditProfile')}>
-            <Text style={UserStyles.actionButtonText}>Chỉnh sửa trang cá nhân</Text>
+          <TouchableOpacity
+            style={UserStyles.actionButton}
+            onPress={() => navigation.navigate("EditProfile")}
+          >
+            <Text style={UserStyles.actionButtonText}>
+              Chỉnh sửa trang cá nhân
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={UserStyles.actionButton}>
-            <Text style={UserStyles.actionButtonText}>Chia sẻ trang cá nhân</Text>
+            <Text style={UserStyles.actionButtonText}>
+              Chia sẻ trang cá nhân
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Tabs */}
         <View style={UserStyles.tabs}>
-          <TouchableOpacity style={[UserStyles.tabItem, UserStyles.tabActive]}>
-            <Text style={[UserStyles.tabText, UserStyles.tabTextActive]}>Bài viết</Text>
+          <TouchableOpacity
+            style={[
+              UserStyles.tabItem,
+              activeTab === "posts" && UserStyles.tabActive,
+            ]}
+            onPress={() => setActiveTab("posts")}
+          >
+            <Text
+              style={[
+                UserStyles.tabText,
+                activeTab === "posts" && UserStyles.tabTextActive,
+              ]}
+            >
+              Bài viết
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={UserStyles.tabItem}>
-            <Text style={UserStyles.tabText}>Bài viết đang trả lời</Text>
+
+          <TouchableOpacity
+            style={[
+              UserStyles.tabItem,
+              activeTab === "replies" && UserStyles.tabActive,
+            ]}
+            onPress={() => setActiveTab("replies")}
+          >
+            <Text
+              style={[
+                UserStyles.tabText,
+                activeTab === "replies" && UserStyles.tabTextActive,
+              ]}
+            >
+              Bài viết đang trả lời
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Empty State */}
-        <View style={UserStyles.emptyState}>
-          <Text style={UserStyles.emptyText}>Bạn chưa đăng bài viết nào.</Text>
-        </View>
+        {/* Nội dung tabs */}
+        {activeTab === "posts" ? (
+          <View style={{ marginTop: 10 }}>
+            <ProfileScreen />
+          </View>
+        ) : (
+          <View style={UserStyles.emptyState}>
+            <Text style={UserStyles.emptyText}>
+              Chưa có bài viết đang trả lời.
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -175,12 +237,12 @@ export default function Profile() {
         screenOptions={{
           headerShown: false,
           drawerStyle: {
-            width: '80%',
-            backgroundColor: '#fff',
+            width: "80%",
+            backgroundColor: "#fff",
           },
-          drawerPosition: 'right',
-          overlayColor: 'rgba(0, 0, 0, 0.5)',
-          drawerType: 'front',
+          drawerPosition: "right",
+          overlayColor: "rgba(0, 0, 0, 0.5)",
+          drawerType: "front",
         }}
       >
         <Drawer.Screen name="ProfileContent" component={ProfileContent} />

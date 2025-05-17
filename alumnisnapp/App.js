@@ -1,10 +1,10 @@
 import React, { useContext } from "react";
 import { StatusBar } from "expo-status-bar";
-import { NavigationContainer ,useNavigation} from "@react-navigation/native";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import { IconButton } from 'react-native-paper';
+import { IconButton } from "react-native-paper";
 import WelcomeScreen from "./components/Welcome";
 import LoginScreen from "./components/User/Login";
 import RegisterScreen from "./components/User/Register";
@@ -29,6 +29,9 @@ import ManageUsersScreen from "./components/Admin/ManageUser";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import CreateSurveyScreen from "./components/Admin/CreateSurvey";
 import UpdatePostScreen from "./components/Post/UpdatePost";
+import PostDetailScreen from "./components/Post/PostDetailScreen";
+import SurveyScreen from "./components/Post/Survey";
+import UpdateSurveyScreen from "./components/Post/UpdateSurvey";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStackNavigator = () => {
@@ -66,15 +69,20 @@ const HomeStackNavigator = () => {
           ),
         }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="PostDetailScreen"
         component={PostDetailScreen}
         options={{ title: "Bài viết" }}
-      /> */}
+      />
       <Stack.Screen
         name="CreatePostScreen"
         component={CreatePostScreen}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SurveyScreen"
+        component={SurveyScreen}
+        options={{ title: "Khảo sát" }}
       />
       <Stack.Screen
         name="CreateSurveyScreen"
@@ -86,11 +94,11 @@ const HomeStackNavigator = () => {
         component={UpdatePostScreen}
         options={{ title: "Chỉnh sửa bài viết" }}
       />
-      {/* <Stack.Screen
+      <Stack.Screen
         name="UpdateSurveyScreen"
-        component={UpdateSurvey}
+        component={UpdateSurveyScreen}
         options={{ title: "Chỉnh sửa khảo sát" }}
-      /> */}
+      />
       <Stack.Screen
         name="Profile"
         component={ProfileScreen}
@@ -99,6 +107,25 @@ const HomeStackNavigator = () => {
     </Stack.Navigator>
   );
 };
+const ProfileStack = createNativeStackNavigator();
+
+function ProfileStackNavigator() {
+  return (
+    <ProfileStack.Navigator>
+      <ProfileStack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{ title: "Cá nhân" }}
+      />
+      <ProfileStack.Screen
+        name="SurveyScreen"
+        component={SurveyScreen}
+        options={{ title: "Khảo sát" }}
+      />
+    </ProfileStack.Navigator>
+  );
+}
+
 function MainTabs() {
   const { state } = useContext(MyUserContext);
   const user = state.user;
@@ -149,7 +176,7 @@ function MainTabs() {
       )}
       <Tab.Screen
         name="Profile"
-        component={ProfileScreen}
+        component={ProfileStackNavigator}
         options={{ title: "Cá nhân" }}
       />
     </Tab.Navigator>
@@ -196,6 +223,7 @@ function AppContent() {
       <Stack.Screen name="CreateSurvey" component={CreateSurveyScreen} />
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
+
     </Stack.Navigator>
   );
 }

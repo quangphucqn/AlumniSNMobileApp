@@ -23,7 +23,7 @@ const MyPostsScreen = () => {
     const fetchToken = async () => {
       try {
         const storedToken = await AsyncStorage.getItem("access_token");
-        console.log("token 1",storedToken)
+        console.log("token 1", storedToken);
         setToken(storedToken);
       } catch (error) {
         console.error("Failed to fetch token:", error);
@@ -36,7 +36,7 @@ const MyPostsScreen = () => {
     if (!token) return;
     setLoading(true);
     try {
-      console.log("token 2",token)
+      console.log("token 2", token);
       const res = await authAPI(token).get(endpoints["my-posts"]);
       setPosts(res.data);
     } catch (error) {
@@ -68,7 +68,11 @@ const MyPostsScreen = () => {
   const handlePostDeletion = (postId) => {
     Alert.alert("Xác nhận", "Bạn chắc chắn muốn xóa bài viết này?", [
       { text: "Hủy", style: "cancel" },
-      { text: "Xóa", style: "destructive", onPress: () => handleDeleteConfirmed(postId) },
+      {
+        text: "Xóa",
+        style: "destructive",
+        onPress: () => handleDeleteConfirmed(postId),
+      },
     ]);
   };
 

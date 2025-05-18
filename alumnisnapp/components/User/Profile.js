@@ -1,22 +1,13 @@
-import React, { useState, useEffect, useContext } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  RefreshControl,
-} from "react-native";
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { api } from "../../configs/API";
-import { MyUserContext } from "../../configs/Context";
-import UserStyles from "./UserStyles";
+import React, { useState, useEffect, useContext } from 'react';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl } from 'react-native';
+import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { api } from '../../configs/API';
+import { MyUserContext } from '../../configs/Context';
+import UserStyles from './UserStyles';
 import ProfileScreen from "../User/ProfileScreen";
 
 // Component cho Drawer Content
@@ -27,8 +18,11 @@ function DrawerContent({ navigation }) {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      await AsyncStorage.multiRemove(["access_token", "refresh_token"]);
-      dispatch({ type: "logout" });
+      // Chỉ xóa access_token khi logout
+      await AsyncStorage.removeItem('access_token');
+      
+      dispatch({ type: 'logout' })
+
     } catch (error) {
       console.error("Logout error:", error);
       Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng xuất");
@@ -103,6 +97,8 @@ function ProfileContent() {
       dispatch({ type: "logout" });
     }
   };
+
+  
 
   useEffect(() => {
     loadUserData();

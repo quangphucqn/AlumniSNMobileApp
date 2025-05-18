@@ -1,3 +1,5 @@
+import 'react-native-reanimated';
+import 'react-native-gesture-handler';
 import React, { useContext } from "react";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
@@ -32,6 +34,7 @@ import UpdatePostScreen from "./components/Post/UpdatePost";
 import PostDetailScreen from "./components/Post/PostDetailScreen";
 import SurveyScreen from "./components/Post/Survey";
 import UpdateSurveyScreen from "./components/Post/UpdateSurvey";
+import ChatRoomDetailScreen from "./components/Chat/ChatRoomDetail";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStackNavigator = () => {
@@ -223,7 +226,7 @@ function AppContent() {
       <Stack.Screen name="CreateSurvey" component={CreateSurveyScreen} />
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
-
+      <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
     </Stack.Navigator>
   );
 }

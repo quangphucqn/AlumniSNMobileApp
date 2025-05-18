@@ -1,11 +1,6 @@
 // API.js
 
 import axios from "axios";
-
-const CLIENT_ID = "bnuIbu1IttTtWIHvfwJth0gWNTBFcrnNqmDcKZsP";
-const CLIENT_SECRET =
-  "pbkdf2_sha256$1000000$K546kUGlBKo5cpNUXkmBG4$xIxXPNCxe0WgoA9Koer5sIHU5K1D5ZuuHFxBOodVNHQsS1e7ALiQPnUE5xueDXxoL6GT7h14vr90DOzF8MZyS2LHSXirHB2z4YMJwQ0VTaN7aiYbiwy1oyuoy0DBeuPGWV3RC3qn5LWz2TSkRMIS/FpGqjZQcPmRpoRw0oY7xmc=";
-
 const BASE_URL = "http://192.168.0.45:8000";
 // Định nghĩa các endpoints
 export const endpoints = {
@@ -50,14 +45,15 @@ export const endpoints = {
 
   // Chat endpoints
   chats: "/chat/",
-  chatDetail: "/chat/{id}/",
-  getMessages: "/chat/{id}/get_messages/",
-  sendMessage: "/chat/{id}/send_message/",
+  chatDetail: (id) => `/chat/${id}/`,
+  getMessages: (id) => `/chat/${id}/get_messages/`,
+  sendMessage: (id) => `/chat/${id}/send_message/`,
+  markAsRead: (id) => `/chat/${id}/mark_as_read/`,
 };
 
 // Tạo instance axios với token
 export const authAPI = (accessToken) => {
-  console.log("Token in authAPI:", accessToken);
+  // console.log("Token in authAPI:", accessToken);
   return axios.create({
     baseURL: BASE_URL,
     headers: {
@@ -65,6 +61,28 @@ export const authAPI = (accessToken) => {
     },
   });
 };
+
+export const getListUsers = async (
+  accessToken,
+  q = "",
+  page = 1,
+  role = ""
+) => {
+  try {
+    const res = await authAPI(accessToken).get(endpoints.user, {
+      params: {
+        ...(q ? { q } : {}),
+        page,
+        ...(role !== undefined && role !== "" ? { role } : {}),
+      },
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return [];
+  }
+};
+
 export const getPostComments = async (postId, token) => {
   try {
     const res = await authAPI(token).get(endpoints.comments(postId));
@@ -145,16 +163,27 @@ export const api = {
     authAPI(accessToken).delete(`${endpoints.events}/${id}/`),
 
   // Chat APIs
-  getChatRooms: (accessToken) => authAPI(accessToken).get(endpoints.chats),
+  getChatRooms: (accessToken, q, page = 1) =>
+    authAPI(accessToken).get(endpoints.chats, {
+      params: { ...(q ? { q } : {}), page },
+    }),
   createChatRoom: (accessToken, data) =>
     authAPI(accessToken).post(endpoints.chats, data),
-  getMessages: (accessToken, roomId) =>
-    authAPI(accessToken).get(`${endpoints.chats}/${roomId}/get_messages/`),
   sendMessage: (accessToken, roomId, data) =>
     authAPI(accessToken).post(
-      `${endpoints.chats}/${roomId}/send_message/`,
+      `${endpoints.chats}${roomId}/send_message/`,
       data
     ),
+  getChatRoomDetail: (accessToken, roomId) =>
+    authAPI(accessToken).get(`${endpoints.chats}${roomId}/`),
+  getMessages: (accessToken, roomId, before_id = null) =>
+    authAPI(accessToken).get(`${endpoints.chats}${roomId}/messages/`, {
+      params: before_id ? { before_id } : {},
+    }),
+  markAsRead: (accessToken, roomId) =>
+    authAPI(accessToken).post(`${endpoints.chats}${roomId}/mark_as_read/`),
+  getLastMessages: (accessToken, roomId) =>
+    authAPI(accessToken).get(`${endpoints.chats}${roomId}/last_messages/`),
 
   // User APIs
   userList: (accessToken, q, page = 1, role) =>

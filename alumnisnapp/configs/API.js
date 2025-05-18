@@ -6,7 +6,7 @@ const CLIENT_ID = "bnuIbu1IttTtWIHvfwJth0gWNTBFcrnNqmDcKZsP";
 const CLIENT_SECRET =
   "pbkdf2_sha256$1000000$K546kUGlBKo5cpNUXkmBG4$xIxXPNCxe0WgoA9Koer5sIHU5K1D5ZuuHFxBOodVNHQsS1e7ALiQPnUE5xueDXxoL6GT7h14vr90DOzF8MZyS2LHSXirHB2z4YMJwQ0VTaN7aiYbiwy1oyuoy0DBeuPGWV3RC3qn5LWz2TSkRMIS/FpGqjZQcPmRpoRw0oY7xmc=";
 
-const BASE_URL = "http://192.168.0.39:8000";
+const BASE_URL = "http://192.168.0.45:8000";
 // Định nghĩa các endpoints
 export const endpoints = {
   // User endpoints
@@ -25,7 +25,7 @@ export const endpoints = {
   // Post endpoints
   post: "/post/",
   "post-detail": (postId) => `/post/${postId}/`,
-  "my-posts": "/post/my-posts",
+  "my-posts": "/post/my-posts/",
   comments: (postId) => `/post/${postId}/comment/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
@@ -84,7 +84,7 @@ export const getPostReacts = async (postId, accessToken) => {
     return [];
   }
 };
-export const getSurveyData = async (postId,accessToken) => {
+export const getSurveyData = async (postId, accessToken) => {
   try {
     const res = await authAPI(accessToken).get(`/survey/${postId}/`);
     console.log("Survey API response:", res);
@@ -94,9 +94,6 @@ export const getSurveyData = async (postId,accessToken) => {
     throw error;
   }
 };
-
-
-
 
 // API functions
 export const api = {

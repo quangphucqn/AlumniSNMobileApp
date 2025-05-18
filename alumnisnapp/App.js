@@ -1,38 +1,5 @@
-<<<<<<< HEAD
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
-import React, { useContext } from 'react';
-import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Ionicons } from '@expo/vector-icons';
-import WelcomeScreen from './components/Welcome';
-import LoginScreen from './components/User/Login';
-import RegisterScreen from './components/User/Register';
-import ProfileScreen from './components/User/Profile';
-import HomeScreen from './components/Home/Home';
-import ChangePasswordScreen from './components/User/ChangePassword';
-import ChatScreen from './components/Chat/ChatRoom';
-import ChatRoomDetailScreen from './components/Chat/ChatRoomDetail';
-import CreatePostScreen from './components/Post/Post';
-import EditProfileScreen from './components/User/EditProfile';
-import VerifyUserScreen from './components/Admin/VerifyUser';
-import { ActivityIndicator, View } from 'react-native';
-import MyUserProvider from './components/MyUserProvider';
-import { MyUserContext } from './configs/Context';
-import ManagementScreen from './components/Admin/ManagementScreen';
-import CreateTeacherScreen from './components/Admin/CreateTeacher';
-import SetTimeTeacherScreen from './components/Admin/SetTimeTeacher';
-import GroupsScreen from './components/Group/Groups';
-import GroupDetailScreen from './components/Group/GroupDetail';
-import CreateGroupScreen from './components/Group/CreateGroup';
-import AddUserScreen from './components/Group/AddUser';
-import ManageUsersScreen from './components/Admin/ManageUser';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
-
-=======
 import React, { useContext } from "react";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
@@ -67,7 +34,7 @@ import UpdatePostScreen from "./components/Post/UpdatePost";
 import PostDetailScreen from "./components/Post/PostDetailScreen";
 import SurveyScreen from "./components/Post/Survey";
 import UpdateSurveyScreen from "./components/Post/UpdateSurvey";
->>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
+import ChatRoomDetailScreen from "./components/Chat/ChatRoomDetail";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStackNavigator = () => {
@@ -259,11 +226,7 @@ function AppContent() {
       <Stack.Screen name="CreateSurvey" component={CreateSurveyScreen} />
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
-<<<<<<< HEAD
       <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
-=======
-
->>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
     </Stack.Navigator>
   );
 }

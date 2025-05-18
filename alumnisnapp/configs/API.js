@@ -1,7 +1,6 @@
 // API.js
 
 import axios from "axios";
-
 const BASE_URL = "http://172.20.10.2:8000";
 
 
@@ -56,7 +55,7 @@ export const endpoints = {
 
 // Tạo instance axios với token
 export const authAPI = (accessToken) => {
-  console.log("Token in authAPI:", accessToken);
+  // console.log("Token in authAPI:", accessToken);
   return axios.create({
     baseURL: BASE_URL,
     headers: {
@@ -64,7 +63,6 @@ export const authAPI = (accessToken) => {
     },
   });
 };
-
 
 export const getListUsers = async (accessToken, q = "", page = 1, role = "") => {
   try {
@@ -81,6 +79,7 @@ export const getListUsers = async (accessToken, q = "", page = 1, role = "") => 
       return [];
   }
 };
+
 export const getPostComments = async (postId, token) => {
   try {
     const res = await authAPI(token).get(endpoints.comments(postId));
@@ -241,8 +240,6 @@ export const handleApiError = (error) => {
     };
   }
 };
-
-
 
 export default axios.create({
   baseURL: BASE_URL,

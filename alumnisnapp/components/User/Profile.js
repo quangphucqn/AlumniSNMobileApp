@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import React, { useState, useEffect, useContext } from 'react';
 import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
@@ -9,29 +8,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { api } from '../../configs/API';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
-import { getCurrentUser } from '../../configs/API';
-=======
-import React, { useState, useEffect, useContext } from "react";
-import {
-  StyleSheet,
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  ScrollView,
-  Alert,
-  RefreshControl,
-} from "react-native";
-import { Feather, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useNavigation } from "@react-navigation/native";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import { api } from "../../configs/API";
-import { MyUserContext } from "../../configs/Context";
-import UserStyles from "./UserStyles";
 import ProfileScreen from "../User/ProfileScreen";
->>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
 
 // Component cho Drawer Content
 function DrawerContent({ navigation }) {
@@ -41,15 +18,11 @@ function DrawerContent({ navigation }) {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-<<<<<<< HEAD
       // Chỉ xóa access_token khi logout
       await AsyncStorage.removeItem('access_token');
       
       dispatch({ type: 'logout' })
-=======
-      await AsyncStorage.multiRemove(["access_token", "refresh_token"]);
-      dispatch({ type: "logout" });
->>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
+
     } catch (error) {
       console.error("Logout error:", error);
       Alert.alert("Lỗi", "Có lỗi xảy ra khi đăng xuất");

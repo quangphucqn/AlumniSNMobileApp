@@ -67,16 +67,26 @@ export default function ChatRoomDetail() {
 
               // Sử dụng hàm cập nhật state để tránh closure problems
               setMessages(prevMessages => {
-                // Tạo một Map từ dữ liệu hiện tại để dễ dàng kiểm tra trùng lặp
+                // Tạo Map từ Firestore
                 const messageMap = new Map();
-
-                // Thêm tin nhắn từ Firestore vào Map (ưu tiên hơn)
                 firestoreMessages.forEach(msg => {
                   messageMap.set(msg.id, msg);
                 });
 
-                // Thêm các tin nhắn cũ chưa có trong Firestore (ví dụ: tin nhắn đang gửi)
-                prevMessages.forEach(msg => {
+                // Loại bỏ các tin nhắn tạm đã được gửi thành công (dựa vào content, sender_id, và trạng thái)
+                const filteredPrev = prevMessages.filter(msg => {
+                  // Nếu là tin nhắn tạm (id bắt đầu bằng 'temp-')
+                  if (typeof msg.id === 'string' && msg.id.startsWith('temp-')) {
+                    // Nếu đã có tin nhắn thật trùng content, sender_id và chưa lỗi thì loại bỏ
+                    return !firestoreMessages.some(fm =>
+                      fm.content === msg.content &&
+                      String(fm.sender_id) === String(msg.sender_id)
+                    );
+                  }
+                  return true;
+                });
+                // Thêm các tin nhắn cũ chưa có trong Firestore
+                filteredPrev.forEach(msg => {
                   if (!messageMap.has(msg.id)) {
                     messageMap.set(msg.id, msg);
                   }
@@ -196,16 +206,16 @@ export default function ChatRoomDetail() {
       error: false,
       timestamp: new Date(),
     };
-    
+
     // Thêm tin nhắn tạm vào state
     setMessages(prev => [tempMsg, ...prev]);
     setInput('');
-  
+
     try {
       console.log('Sending message to API:', tempMsg.content);
       const result = await api.sendMessage(token, roomId, { content: tempMsg.content });
       console.log('API response after sending message:', result);
-      
+
       // Khi gửi thành công, chỉ cập nhật trạng thái của tin nhắn tạm
       // và KHÔNG thêm tin nhắn mới từ API vào đây - để Firestore listener lo
       setMessages(prev =>
@@ -222,7 +232,7 @@ export default function ChatRoomDetail() {
       );
     }
   };
-  
+
 
   // Render tin nhắn
   const renderMessage = ({ item }) => {

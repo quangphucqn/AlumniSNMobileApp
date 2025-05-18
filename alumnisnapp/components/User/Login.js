@@ -2,13 +2,13 @@ import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
-
-const CLIENT_ID = 'rWEssaZoNvTosQ3TPJL5KbfLE9IqROWtc3SjiHkb';
-const CLIENT_SECRET = 'u3hCX7ohbh1L8pUthVKLuygb8F0WFdyvYqvrHjornAMuUiYfH4M2h036hfQIsMNy5r8Om6RKh9XDmQQoVhKkCUxUOlNioX6tF9DYku4ucQZvCDhpU1FYXq6Fqcfiv6aO';
+import { CLIENT_ID, CLIENT_SECRET } from '@env';
+import { authenticateWithBiometrics } from '../../configs/Utils';
 
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -67,7 +67,7 @@ export default function Login({ navigation, route }) {
       navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
     } else {
       Alert.alert('Lỗi', 'Tài khoản không hợp lệ!');
-      await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+      await AsyncStorage.multiRemove(['access_token', 'user']);
       dispatch({ type: 'logout' });
     }
   };
@@ -114,6 +114,51 @@ export default function Login({ navigation, route }) {
     }
   };
 
+  // Đăng nhập bằng khuôn mặt
+  const handleFaceLogin = async () => {
+    try {
+      setLoading(true);
+      const isAuthenticated = await authenticateWithBiometrics();
+      console.log('Biometric result:', isAuthenticated);
+      if (!isAuthenticated) {
+        Alert.alert('Thông báo', 'Xác thực khuôn mặt thất bại!');
+        return;
+      }
+      const refreshToken = await AsyncStorage.getItem('refresh_token');
+      console.log('Refresh token:', refreshToken);
+      if (!refreshToken) {
+        Alert.alert('Thông báo', 'Không tìm thấy refresh token. Vui lòng đăng nhập bằng mật khẩu.');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('grant_type', 'refresh_token');
+      formData.append('refresh_token', refreshToken);
+      formData.append('client_id', CLIENT_ID);
+      formData.append('client_secret', CLIENT_SECRET);
+
+      const response = await api.login(formData);
+      console.log('API response:', response.data);
+      if (response.data.access_token) {
+        await AsyncStorage.setItem('access_token', response.data.access_token);
+        await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
+        const userResponse = await api.getCurrentUser(response.data.access_token);
+        const user = userResponse.data;
+        await handleLoginSuccess(user);
+      } else {
+        throw new Error('Không nhận được access token từ server');
+      }
+    } catch (error) {
+      console.log('Face login error:', error, error?.response?.data);
+      let errorMessage = 'Đăng nhập bằng khuôn mặt thất bại. Vui lòng thử lại!';
+      if (error.response?.data?.error === 'invalid_grant') {
+        errorMessage = 'Refresh token không hợp lệ hoặc đã hết hạn. Vui lòng đăng nhập lại bằng mật khẩu.';
+      }
+      Alert.alert('Lỗi', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <View style={UserStyles.container}>
@@ -152,7 +197,7 @@ export default function Login({ navigation, route }) {
         </View>
         <View style={UserStyles.orContainer}>
           <View style={UserStyles.line} />
-          <Text style={UserStyles.orText}>or</Text>
+          <Text style={UserStyles.orText}>hoặc</Text>
           <View style={UserStyles.line} />
         </View>
         <View style={UserStyles.socialContainer}>
@@ -168,15 +213,24 @@ export default function Login({ navigation, route }) {
               <Text style={UserStyles.registerLink}>Đăng ký ngay</Text>
             </TouchableOpacity>
           </View>
-          <TouchableOpacity 
-            style={[UserStyles.loginButton, loading && UserStyles.loginButtonDisabled]} 
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            <Text style={UserStyles.loginButtonText}>
-              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
-            </Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <TouchableOpacity 
+              style={[UserStyles.loginButton, loading && UserStyles.loginButtonDisabled, { flex: 1 }]} 
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              <Text style={UserStyles.loginButtonText}>
+                {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={[UserStyles.socialButton, { marginLeft: 12, marginBottom:15,width:50,height:50 }]} 
+              onPress={handleFaceLogin}
+              disabled={loading}
+            >
+              <MaterialCommunityIcons name="face-recognition" size={24} color="black" />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
       {/* Modal chờ xác thực */}

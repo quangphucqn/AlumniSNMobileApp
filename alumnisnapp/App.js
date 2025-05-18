@@ -1,3 +1,5 @@
+import 'react-native-reanimated';
+import 'react-native-gesture-handler';
 import React, { useContext } from 'react';
 import { StatusBar } from 'expo-status-bar';
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,6 +13,7 @@ import ProfileScreen from './components/User/Profile';
 import HomeScreen from './components/Home/Home';
 import ChangePasswordScreen from './components/User/ChangePassword';
 import ChatScreen from './components/Chat/ChatRoom';
+import ChatRoomDetailScreen from './components/Chat/ChatRoomDetail';
 import CreatePostScreen from './components/Post/Post';
 import EditProfileScreen from './components/User/EditProfile';
 import VerifyUserScreen from './components/Admin/VerifyUser';
@@ -26,6 +29,7 @@ import CreateGroupScreen from './components/Group/CreateGroup';
 import AddUserScreen from './components/Group/AddUser';
 import ManageUsersScreen from './components/Admin/ManageUser';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -101,6 +105,7 @@ function AppContent() {
       <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
+      <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
     </Stack.Navigator>
   );
 }

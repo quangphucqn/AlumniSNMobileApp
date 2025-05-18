@@ -8,6 +8,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { api } from '../../configs/API';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
+import { getCurrentUser } from '../../configs/API';
 
 // Component cho Drawer Content
 function DrawerContent({ navigation }) {
@@ -16,8 +17,8 @@ function DrawerContent({ navigation }) {
   const handleLogout = async () => {
     try {
       setIsLoading(true);
-      // Chỉ xóa access_token và refresh_token khi logout
-      await AsyncStorage.multiRemove(['access_token', 'refresh_token']);
+      // Chỉ xóa access_token khi logout
+      await AsyncStorage.removeItem('access_token');
       
       dispatch({ type: 'logout' })
     } catch (error) {
@@ -91,6 +92,8 @@ function ProfileContent() {
       dispatch({ type: 'logout' });
     }
   };
+
+  
 
   useEffect(() => {
     loadUserData();

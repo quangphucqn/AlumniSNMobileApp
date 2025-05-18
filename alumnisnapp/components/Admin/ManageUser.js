@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, A
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../../configs/API';
+import { api, getListUsers } from '../../configs/API';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import groupStyles from '../Group/GroupStyles';
 import styles from '../Admin/AdminStyles';
@@ -29,20 +29,19 @@ export default function ManageUser() {
   const [modalOpacity] = useState(new Animated.Value(0));
   const navigation = useNavigation();
   // Fetch users with pagination, search, role
-  const fetchUsers = async (q = '', pageNum = 1, append = false, roleValue = role) => {
+  const fetchUsersList = async (q = '', pageNum = 1, append = false, roleValue = role) => {
     if (pageNum === 1) setLoadingUsers(true);
     else setLoadingMore(true);
     try {
       const token = await AsyncStorage.getItem('access_token');
-      const res = await api.userList(token, q, pageNum, roleValue);
-      const list = res.data.results || res.data;
+      const list = await getListUsers(token, q, pageNum, roleValue);
       setUsers(prev => {
-        if (!append) return list;
+        if (!append) return list.results || list;
         const map = new Map();
-        [...prev, ...list].forEach(u => map.set(u.id, u));
+        [...prev, ...(list.results || list)].forEach(u => map.set(u.id, u));
         return Array.from(map.values());
       });
-      setHasNext(!!res.data.next);
+      setHasNext(!!(list.next));
       setPage(pageNum);
     } catch (e) {
       Alert.alert('Lỗi', 'Không thể tải danh sách user!');
@@ -53,19 +52,19 @@ export default function ManageUser() {
   };
 
   useEffect(() => {
-    fetchUsers('', 1, false, role);
+    fetchUsersList('', 1, false, role);
   }, [role]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      fetchUsers(search.trim(), 1, false, role);
+      fetchUsersList(search.trim(), 1, false, role);
     }, 400);
     return () => clearTimeout(timeout);
   }, [search]);
 
   const handleLoadMore = () => {
     if (hasNext && !loadingMore && !loadingUsers) {
-      fetchUsers(search.trim(), page + 1, true, role);
+      fetchUsersList(search.trim(), page + 1, true, role);
     }
   };
 

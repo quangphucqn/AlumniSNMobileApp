@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 import React, { useContext } from 'react';
@@ -31,8 +32,135 @@ import ManageUsersScreen from './components/Admin/ManageUser';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
+=======
+import React, { useContext } from "react";
+import { StatusBar } from "expo-status-bar";
+import { NavigationContainer, useNavigation } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
+import { IconButton } from "react-native-paper";
+import WelcomeScreen from "./components/Welcome";
+import LoginScreen from "./components/User/Login";
+import RegisterScreen from "./components/User/Register";
+import ProfileScreen from "./components/User/Profile";
+import HomeScreen from "./components/Home/Home";
+import ChangePasswordScreen from "./components/User/ChangePassword";
+import ChatScreen from "./components/Chat/ChatRoom";
+import CreatePostScreen from "./components/Post/Post";
+import EditProfileScreen from "./components/User/EditProfile";
+import VerifyUserScreen from "./components/Admin/VerifyUser";
+import { ActivityIndicator, View } from "react-native";
+import MyUserProvider from "./components/MyUserProvider";
+import { MyUserContext } from "./configs/Context";
+import ManagementScreen from "./components/Admin/ManagementScreen";
+import CreateTeacherScreen from "./components/Admin/CreateTeacher";
+import SetTimeTeacherScreen from "./components/Admin/SetTimeTeacher";
+import GroupsScreen from "./components/Group/Groups";
+import GroupDetailScreen from "./components/Group/GroupDetail";
+import CreateGroupScreen from "./components/Group/CreateGroup";
+import AddUserScreen from "./components/Group/AddUser";
+import ManageUsersScreen from "./components/Admin/ManageUser";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import CreateSurveyScreen from "./components/Admin/CreateSurvey";
+import UpdatePostScreen from "./components/Post/UpdatePost";
+import PostDetailScreen from "./components/Post/PostDetailScreen";
+import SurveyScreen from "./components/Post/Survey";
+import UpdateSurveyScreen from "./components/Post/UpdateSurvey";
+>>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const HomeStackNavigator = () => {
+  const navigation = useNavigation();
+
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          title: "Trang chủ",
+          headerBackVisible: false,
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <IconButton
+                icon="newspaper-variant-multiple-outline"
+                size={24}
+                onPress={() =>
+                  navigation.navigate("Home", { screen: "Profile" })
+                }
+                color="black"
+              />
+              <IconButton
+                icon="pencil-plus"
+                size={24}
+                onPress={() =>
+                  navigation.navigate("Home", {
+                    screen: "CreatePostScreen",
+                  })
+                }
+                color="black"
+              />
+            </View>
+          ),
+        }}
+      />
+      <Stack.Screen
+        name="PostDetailScreen"
+        component={PostDetailScreen}
+        options={{ title: "Bài viết" }}
+      />
+      <Stack.Screen
+        name="CreatePostScreen"
+        component={CreatePostScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="SurveyScreen"
+        component={SurveyScreen}
+        options={{ title: "Khảo sát" }}
+      />
+      <Stack.Screen
+        name="CreateSurveyScreen"
+        component={CreateSurveyScreen}
+        options={{ title: "Tạo khảo sát" }}
+      />
+      <Stack.Screen
+        name="UpdatePostScreen"
+        component={UpdatePostScreen}
+        options={{ title: "Chỉnh sửa bài viết" }}
+      />
+      <Stack.Screen
+        name="UpdateSurveyScreen"
+        component={UpdateSurveyScreen}
+        options={{ title: "Chỉnh sửa khảo sát" }}
+      />
+      <Stack.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ title: "Dòng thời gian" }}
+      />
+    </Stack.Navigator>
+  );
+};
+const ProfileStack = createNativeStackNavigator();
+
+function ProfileStackNavigator() {
+  return (
+    <ProfileStack.Navigator>
+      <ProfileStack.Screen
+        name="ProfileScreen"
+        component={ProfileScreen}
+        options={{ title: "Cá nhân" }}
+      />
+      <ProfileStack.Screen
+        name="SurveyScreen"
+        component={SurveyScreen}
+        options={{ title: "Khảo sát" }}
+      />
+    </ProfileStack.Navigator>
+  );
+}
 
 function MainTabs() {
   const { state } = useContext(MyUserContext);
@@ -43,31 +171,50 @@ function MainTabs() {
         headerShown: false,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
-          if (route.name === 'Home') {
-            iconName = focused ? 'home' : 'home-outline';
-          } else if (route.name === 'Chat') {
-            iconName = focused ? 'chatbubble' : 'chatbubble-outline';
-          } else if (route.name === 'CreatePost') {
-            iconName = focused ? 'create' : 'create-outline';
-          } else if (route.name === 'Profile') {
-            iconName = focused ? 'person' : 'person-outline';
-          } else if (route.name === 'Management') {
-            iconName = focused ? 'settings' : 'settings-outline';
+          if (route.name === "Home") {
+            iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "Chat") {
+            iconName = focused ? "chatbubble" : "chatbubble-outline";
+          } else if (route.name === "CreatePost") {
+            iconName = focused ? "create" : "create-outline";
+          } else if (route.name === "Profile") {
+            iconName = focused ? "person" : "person-outline";
+          } else if (route.name === "Management") {
+            iconName = focused ? "settings" : "settings-outline";
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#222',
-        tabBarInactiveTintColor: '#888',
+        tabBarActiveTintColor: "#222",
+        tabBarInactiveTintColor: "#888",
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Trang chủ' }} />
-      <Tab.Screen name="Chat" component={ChatScreen} options={{ title: 'Tin nhắn' }} />
-      <Tab.Screen name="CreatePost" component={CreatePostScreen} options={{ title: 'Đăng bài' }} />
+      <Tab.Screen
+        name="Home"
+        component={HomeStackNavigator}
+        options={{ title: "Trang chủ" }}
+      />
+      <Tab.Screen
+        name="Chat"
+        component={ChatScreen}
+        options={{ title: "Tin nhắn" }}
+      />
+      <Tab.Screen
+        name="CreatePost"
+        component={CreatePostScreen}
+        options={{ title: "Đăng bài" }}
+      />
       {user && user.role === 0 && (
-        <Tab.Screen name="Management" component={ManagementScreen} options={{ title: 'Quản lý' }} />
+        <Tab.Screen
+          name="Management"
+          component={ManagementScreen}
+          options={{ title: "Quản lý" }}
+        />
       )}
-      <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Cá nhân' }} />
-      
+      <Tab.Screen
+        name="Profile"
+        component={ProfileStackNavigator}
+        options={{ title: "Cá nhân" }}
+      />
     </Tab.Navigator>
   );
 }
@@ -76,7 +223,7 @@ function AppContent() {
   const { state } = useContext(MyUserContext);
   if (state.loading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" color="#222" />
       </View>
     );
@@ -84,7 +231,10 @@ function AppContent() {
   if (!state.user) {
     // Chưa đăng nhập
     return (
-      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="Welcome">
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName="Welcome"
+      >
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Register" component={RegisterScreen} />
@@ -93,7 +243,10 @@ function AppContent() {
   }
   // Đã đăng nhập
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName="MainApp">
+    <Stack.Navigator
+      screenOptions={{ headerShown: false }}
+      initialRouteName="MainApp"
+    >
       <Stack.Screen name="MainApp" component={MainTabs} />
       <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
       <Stack.Screen name="EditProfile" component={EditProfileScreen} />
@@ -103,9 +256,14 @@ function AppContent() {
       <Stack.Screen name="Groups" component={GroupsScreen} />
       <Stack.Screen name="GroupDetail" component={GroupDetailScreen} />
       <Stack.Screen name="CreateGroup" component={CreateGroupScreen} />
+      <Stack.Screen name="CreateSurvey" component={CreateSurveyScreen} />
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
+<<<<<<< HEAD
       <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
+=======
+
+>>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
     </Stack.Navigator>
   );
 }

@@ -2,8 +2,9 @@
 
 import axios from "axios";
 
-
 const BASE_URL = "http://172.20.10.2:8000";
+
+
 // Định nghĩa các endpoints
 export const endpoints = {
   // User endpoints
@@ -20,19 +21,19 @@ export const endpoints = {
   setPasswordResetTime: "/user",
   getTeachersExpiredPassword: "/user/teachers_expired_password_reset/",
   // Post endpoints
-  posts: "/posts/",
+  post: "/post/",
   "post-detail": (postId) => `/post/${postId}/`,
-  myPosts: "/posts/my-posts/",
-  comments: (postId) => `/post/${postId}/comments/`,
+  "my-posts": "/post/my-posts",
+  comments: (postId) => `/post/${postId}/comment/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
   // Comment endpoints
   "comment-detail": (commentId) => `/comment/${commentId}/`,
-  replyComment: "/comments/{id}/reply/",
+  replyComment: (commentId) => `/comment/${commentId}/reply/`,
   reacts: (postId) => `/post/${postId}/reacts/`,
   react: (postId) => `/post/${postId}/react/`,
   // Survey endpoints
-  surveys: "/surveys/",
+  survey: "/survey/",
   "survey-detail": (surveyId) => `/survey/${surveyId}/`,
   draft: (surveyId) => `/survey/${surveyId}/draft/`,
   submit: (surveyId) => `/survey/${surveyId}/submit/`,
@@ -55,6 +56,7 @@ export const endpoints = {
 
 // Tạo instance axios với token
 export const authAPI = (accessToken) => {
+  console.log("Token in authAPI:", accessToken);
   return axios.create({
     baseURL: BASE_URL,
     headers: {
@@ -62,6 +64,7 @@ export const authAPI = (accessToken) => {
     },
   });
 };
+
 
 export const getListUsers = async (accessToken, q = "", page = 1, role = "") => {
   try {
@@ -78,44 +81,48 @@ export const getListUsers = async (accessToken, q = "", page = 1, role = "") => 
       return [];
   }
 };
-export const getPostComments = async (postId) => {
-    try {
-        const res = await axios.get(BASE_URL + endpoints.comments(postId));
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching comments:", error);
-        return [];
-    }
+export const getPostComments = async (postId, token) => {
+  try {
+    const res = await authAPI(token).get(endpoints.comments(postId));
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching comments:", error);
+    return [];
+  }
 };
 
-export const getPostReacts = async (postId) => {
-    try {
-        const res = await axios.get(BASE_URL + endpoints.reacts(postId));
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching reacts:", error);
-        return [];
-    }
+export const getPostReacts = async (postId, accessToken) => {
+  try {
+    const res = await authAPI(accessToken).get(endpoints.reacts(postId));
+    return res.data;
+  } catch (error) {
+    console.error("Error fetching reacts:", error);
+    return [];
+  }
+};
+export const getSurveyData = async (postId,accessToken) => {
+  try {
+    const res = await authAPI(accessToken).get(`/survey/${postId}/`);
+    console.log("Survey API response:", res);
+    return res.data;
+  } catch (error) {
+    console.error("Survey fetch error:", error.response?.data || error.message);
+    throw error;
+  }
 };
 
-export const getSurveyData = async (surveyId) => {
-    try {
-        const res = await axios.get(BASE_URL + endpoints["survey-detail"](surveyId));
-        return res.data;
-    } catch (error) {
-        console.error("Error fetching reacts:", error);
-        return [];
-    }
-};
+
+
+
 // API functions
 export const api = {
   // Auth APIs
   login: (formData) => {
     return axios.post(BASE_URL + endpoints.login, formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
-        'Accept': 'application/json'
-      }
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
     });
   },
   register: (userData) => axios.post(endpoints.register, userData),
@@ -124,44 +131,8 @@ export const api = {
     authAPI(accessToken).get(endpoints.currentUser),
 
   // Post APIs
-  getPosts: (accessToken, params) =>
-    authAPI(accessToken).get(endpoints.posts, { params }),
-  getMyPosts: (accessToken) => authAPI(accessToken).get(endpoints.myPosts),
-  createPost: (accessToken, formData) =>
-    authAPI(accessToken).post(endpoints.posts, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }),
-  updatePost: (accessToken, id, data) =>
-    authAPI(accessToken).patch(`${endpoints.posts}/${id}/`, data),
-  deletePost: (accessToken, id) =>
-    authAPI(accessToken).delete(`${endpoints.posts}/${id}/`),
-  lockUnlockComments: (accessToken, id) =>
-    authAPI(accessToken).patch(`${endpoints.posts}/${id}/lock-unlock-comment/`),
-
   // Comment APIs
-  createComment: (accessToken, postId, data) =>
-    authAPI(accessToken).post(`${endpoints.posts}/${postId}/comment/`, data),
-  updateComment: (accessToken, id, data) =>
-    authAPI(accessToken).patch(`${endpoints.comments}/${id}/`, data),
-  deleteComment: (accessToken, id) =>
-    authAPI(accessToken).delete(`${endpoints.comments}/${id}/`),
-  replyComment: (accessToken, id, data) =>
-    authAPI(accessToken).post(`${endpoints.comments}/${id}/reply/`, data),
-
   // Survey APIs
-  getSurveys: (accessToken) => authAPI(accessToken).get(endpoints.surveys),
-  createSurvey: (accessToken, data) =>
-    authAPI(accessToken).post(endpoints.surveys, data),
-  updateSurvey: (accessToken, id, data) =>
-    authAPI(accessToken).patch(`${endpoints.surveys}/${id}/`, data),
-  saveDraft: (accessToken, id, data) =>
-    authAPI(accessToken).post(`${endpoints.surveys}/${id}/draft/`, data),
-  submitSurvey: (accessToken, id, data) =>
-    authAPI(accessToken).post(`${endpoints.surveys}/${id}/submit/`, data),
-  resumeSurvey: (accessToken, id) =>
-    authAPI(accessToken).get(`${endpoints.surveys}/${id}/resume/`),
 
   // Group APIs
   getGroups: (accessToken, q, page = 1) =>

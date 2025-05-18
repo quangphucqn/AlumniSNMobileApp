@@ -7,8 +7,14 @@ import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
+<<<<<<< HEAD
 import { CLIENT_ID, CLIENT_SECRET } from '@env';
 import { authenticateWithBiometrics } from '../../configs/Utils';
+=======
+
+const CLIENT_ID = 'bnuIbu1IttTtWIHvfwJth0gWNTBFcrnNqmDcKZsP';
+const CLIENT_SECRET = 'WgoA9Koer5sIHU5K1D5ZuuHFxBOodVNHQsS1e7ALiQPnUE5xueDXxoL6GT7h14vr90DOzF8MZyS2LHSXirHB2z4YMJwQ0VTaN7aiYbiwy1oyuoy0DBeuPGWV3RC3qn5L';
+>>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
 
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);

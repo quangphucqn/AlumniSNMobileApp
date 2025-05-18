@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-community/datetimepicker": "^8.3.0",
+    "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/bottom-tabs": "^7.3.12",
     "@react-navigation/drawer": "^7.3.11",
     "@react-navigation/native": "^7.1.8",
@@ -23,7 +25,12 @@
     "firebase": "^11.7.3",
     "moment": "^2.30.1",
     "react": "19.0.0",
+<<<<<<< HEAD
     "react-native": "^0.79.2",
+=======
+    "react-native": "0.79.2",
+    "react-native-image-picker": "^8.2.1",
+>>>>>>> d816d0c5a69a24c80e7eb5b259d37cbc6842a0eb
     "react-native-paper": "^5.14.1",
     "react-native-reanimated": "~3.17.4",
     "react-native-render-html": "^6.3.4",

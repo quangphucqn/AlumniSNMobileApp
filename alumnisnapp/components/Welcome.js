@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   loginButton: {
-    backgroundColor: '#222',
+    backgroundColor: '#2563eb',
     paddingVertical: 14,
     borderRadius: 10,
     width: '100%',
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   registerButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: 'lightgray',
     paddingVertical: 14,
     borderRadius: 10,
     width: '100%',

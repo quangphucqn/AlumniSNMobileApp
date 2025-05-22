@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, StyleSheet, Alert, ActivityIndicat
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { api } from '../../configs/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from '@react-navigation/native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MyUserContext } from '../../configs/Context';
@@ -51,7 +51,7 @@ export default function EditProfile() {
         setLoading(false);
         return;
       }
-      const accessToken = await AsyncStorage.getItem('access_token');
+      const accessToken = await SecureStore.getItemAsync('access_token');
       const formData = new FormData();
       formData.append('avatar', {
         uri,
@@ -81,7 +81,7 @@ export default function EditProfile() {
         setLoading(false);
         return;
       }
-      const accessToken = await AsyncStorage.getItem('access_token');
+      const accessToken = await SecureStore.getItemAsync('access_token');
       const formData = new FormData();
       formData.append('cover', {
         uri,
@@ -114,7 +114,7 @@ export default function EditProfile() {
           <Image source={{ uri: avatar || 'https://via.placeholder.com/150' }} style={UserStyles.avatar} />
           <View style={UserStyles.editIcon}><Ionicons name="camera" size={20} color="#fff" /></View>
         </TouchableOpacity>
-      </View>
+      </View> 
       <View style={UserStyles.section}>
         <Text style={UserStyles.label}>Ảnh cover</Text>
         <TouchableOpacity style={UserStyles.coverPicker} onPress={() => pickImage('cover')} disabled={loading}>

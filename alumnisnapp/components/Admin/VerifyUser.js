@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import styles from './AdminStyles';
 
 export default function VerifyUser() {
@@ -24,7 +24,7 @@ export default function VerifyUser() {
     if (pageNum === 1) setLoading(true);
     else setIsLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const res = await api.getUnverifiedUsers(token, q, pageNum);
       // Giả sử backend trả về { results, next }
       const users = res.data.results || res.data;
@@ -71,7 +71,7 @@ export default function VerifyUser() {
   const handleVerify = async (id) => {
     setVerifying(id);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const res = await api.verifyUser(token, id);
       console.log(res.data);
       Alert.alert('Thành công', 'Đã xác thực người dùng!');

@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import groupStyles from './GroupStyles';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
@@ -29,7 +29,7 @@ export default function GroupDetail() {
     if (pageNum === 1) setLoading(true);
     else setIsLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const res = await api.getGroupDetail(token, groupId, pageNum, q);
       // Dữ liệu backend trả về: { count, next, previous, results: { ...group, users: [...] } }
       const { count, next, previous, results } = res.data;
@@ -83,7 +83,7 @@ export default function GroupDetail() {
       { text: 'Huỷ', style: 'cancel' },
       { text: 'Xoá', style: 'destructive', onPress: async () => {
         try {
-          const token = await AsyncStorage.getItem('access_token');
+          const token = await SecureStore.getItemAsync('access_token');
           await api.removeUsers(token, groupId, { users: [user.id] });
           fetchGroupDetail(search.trim(), 1, false);
         } catch (e) {

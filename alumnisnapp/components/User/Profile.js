@@ -1,25 +1,77 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl, Switch } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { api } from '../../configs/API';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
 import ProfileScreen from "../User/ProfileScreen";
+import { authenticateWithBiometrics } from '../../configs/Utils';
 
 // Component cho Drawer Content
 function DrawerContent({ navigation }) {
   const [isLoading, setIsLoading] = useState(false);
-  const { dispatch } = useContext(MyUserContext);
+  const { state, dispatch } = useContext(MyUserContext);
+  const [isFaceIDEnabled, setIsFaceIDEnabled] = useState(false);
+
+  useEffect(() => {
+    // Kiểm tra trạng thái Face ID khi component mount
+    const checkFaceIDStatus = async () => {
+      try {
+        const username = state?.user?.username;
+        if (username) {
+          const status = await AsyncStorage.getItem(`faceIDEnabled_${username}`);
+          setIsFaceIDEnabled(status === 'true');
+        }
+      } catch (error) {
+        console.error('Error checking Face ID status:', error);
+      }
+    };
+    checkFaceIDStatus();
+  }, [state?.user?.username]);
+
+  const toggleFaceID = async () => {
+    try {
+      if (!isFaceIDEnabled) {
+        // Nếu đang tắt và muốn bật
+        const isAuthenticated = await authenticateWithBiometrics();
+        if (isAuthenticated) {
+          const username = state?.user?.username;
+          if (username) {
+            await AsyncStorage.setItem(`faceIDEnabled_${username}`, 'true');
+          }
+          setIsFaceIDEnabled(true);
+          Alert.alert('Thành công', 'Đã bật xác thực khuôn mặt');
+        } else {
+          Alert.alert('Thất bại', 'Xác thực khuôn mặt không thành công');
+        }
+      } else {
+        // Nếu đang bật và muốn tắt
+        const username = state?.user?.username;
+        if (username) {
+          await AsyncStorage.removeItem(`faceIDEnabled_${username}`);
+        }
+        setIsFaceIDEnabled(false);
+        Alert.alert('Thông báo', 'Đã tắt xác thực khuôn mặt');
+      }
+    } catch (error) {
+      console.error('Error toggling Face ID:', error);
+      Alert.alert('Lỗi', 'Không thể thay đổi trạng thái xác thực khuôn mặt');
+    }
+  };
 
   const handleLogout = async () => {
     try {
       setIsLoading(true);
       // Chỉ xóa access_token khi logout
-      await AsyncStorage.removeItem('access_token');
+      await Promise.all([
+        SecureStore.deleteItemAsync('access_token'),
+        SecureStore.deleteItemAsync('user')
+      ]);
       
       dispatch({ type: 'logout' })
 
@@ -59,6 +111,19 @@ function DrawerContent({ navigation }) {
           </View>
         </TouchableOpacity>
 
+        <View style={UserStyles.drawerItem}>
+          <View style={UserStyles.drawerItemLeft}>
+            <Image source={require('../../assets/face-id.png')} style={{ width: 30, height: 30 }} />
+            <Text style={UserStyles.drawerItemText}>Đăng nhập bằng khuôn mặt</Text>
+          </View>
+          <Switch
+            value={isFaceIDEnabled}
+            onValueChange={toggleFaceID}
+            trackColor={{ false: "#767577", true: "#00FF00" }}
+            thumbColor={isFaceIDEnabled ? "white" : "#f4f3f4"}
+          />
+        </View>
+
         <TouchableOpacity
           style={UserStyles.drawerItem}
           onPress={handleLogout}
@@ -85,7 +150,7 @@ function ProfileContent() {
 
   const loadUserData = async () => {
     try {
-      const accessToken = await AsyncStorage.getItem("access_token");
+      const accessToken = await SecureStore.getItemAsync("access_token");
       if (accessToken) {
         const res = await api.getCurrentUser(accessToken);
         dispatch({ type: "login", payload: res.data });

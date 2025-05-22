@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Alert, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { api, getListUsers } from '../../configs/API';
 import groupStyles from './GroupStyles';
 import { useNavigation } from '@react-navigation/native';
@@ -25,7 +25,7 @@ export default function CreateGroup() {
     if (pageNum === 1) setLoadingUsers(true);
     else setLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const list = await getListUsers(token, q, pageNum);
       setUsers(prev => {
         if (!append) return list.results || list;
@@ -80,7 +80,7 @@ export default function CreateGroup() {
     }
     setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const data = {
         group_name: groupName.trim(),
         users: selectedUserIds,

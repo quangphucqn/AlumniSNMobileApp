@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Alert, Image, Modal } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { api, getListUsers } from '../../configs/API';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import groupStyles from '../Group/GroupStyles';
@@ -33,7 +33,7 @@ export default function ManageUser() {
     if (pageNum === 1) setLoadingUsers(true);
     else setLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const list = await getListUsers(token, q, pageNum, roleValue);
       setUsers(prev => {
         if (!append) return list.results || list;
@@ -73,7 +73,7 @@ export default function ManageUser() {
       { text: 'Huỷ', style: 'cancel' },
       { text: 'Xoá', style: 'destructive', onPress: async () => {
         try {
-          const token = await AsyncStorage.getItem('access_token');
+          const token = await SecureStore.getItemAsync('access_token');
           await api.deleteUser(token, user.id);
           setUsers(prev => prev.filter(u => u.id !== user.id));
         } catch (e) {

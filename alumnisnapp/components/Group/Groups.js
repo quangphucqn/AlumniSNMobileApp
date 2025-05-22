@@ -4,7 +4,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import groupStyles from './GroupStyles';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 
@@ -57,7 +57,7 @@ export default function Groups() {
     if (pageNum === 1) setLoading(true);
     else setIsLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const res = await api.getGroups(token, q, pageNum);
       const groups = res.data.results || res.data;
       setData(prev => {
@@ -108,7 +108,7 @@ export default function Groups() {
       {
         text: 'Xoá', style: 'destructive', onPress: async () => {
           try {
-            const token = await AsyncStorage.getItem('access_token');
+            const token = await SecureStore.getItemAsync('access_token');
             await api.deleteGroup(token, group.id);
             fetchGroups(search.trim(), 1, false);
           } catch (e) {

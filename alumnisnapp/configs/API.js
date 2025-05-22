@@ -1,7 +1,9 @@
 // API.js
 
 import axios from "axios";
-const BASE_URL = "http://192.168.0.45:8000";
+
+const BASE_URL = "http://192.168.1.8:8000";
+
 // Định nghĩa các endpoints
 export const endpoints = {
   // User endpoints

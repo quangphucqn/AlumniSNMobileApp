@@ -31,7 +31,7 @@ const features = [
   },{
     key: 'postservey',
     label: 'Đăng bài khảo sát',
-    icon: <Ionicons name="paper-plane" size={36} color="#FFCC33" />,
+    icon: <Ionicons name="bar-chart" size={36} color="#FFCC33" />,
   },
   {
     key: 'eventinvite',

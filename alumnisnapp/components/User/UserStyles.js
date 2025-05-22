@@ -378,7 +378,7 @@ const UserStyles = StyleSheet.create({
     position: 'absolute',
     bottom: 8,
     right: 8,
-    backgroundColor: '#2563eb',
+    backgroundColor: 'gray',
     borderRadius: 16,
     padding: 4,
   },
@@ -463,7 +463,7 @@ const UserStyles = StyleSheet.create({
     marginLeft: 2,
   },
   loginButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#2563eb',
     paddingVertical: 14,
     borderRadius: 10,
     width: '100%',

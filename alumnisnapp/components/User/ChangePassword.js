@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { api } from '../../configs/API';
 import UserStyles from './UserStyles';
 
@@ -21,7 +21,7 @@ export default function ChangePasswordScreen({ navigation }) {
 
     try {
       setIsLoading(true);
-      const accessToken = await AsyncStorage.getItem('access_token');
+      const accessToken = await SecureStore.getItemAsync('access_token');
       if (!accessToken) {
         throw new Error('Không tìm thấy token');
       }

@@ -10,7 +10,7 @@ import {
 import API, { authAPI, endpoints } from "../../configs/API";
 import { ActivityIndicator, Searchbar } from "react-native-paper";
 import { PostItem } from "../Post/PostItem";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from "@react-navigation/native";
 
 const Home = () => {
@@ -24,7 +24,7 @@ const Home = () => {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem("access_token");
+        const storedToken = await SecureStore.getItemAsync("access_token");
         console.log("Stored token:", storedToken);
         setToken(storedToken);
       } catch (error) {

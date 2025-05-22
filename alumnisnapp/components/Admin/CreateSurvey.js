@@ -13,7 +13,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { IconButton, Button, Appbar } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { authAPI, endpoints } from "../../configs/API";
 import * as ImagePicker from "expo-image-picker";
 
@@ -134,7 +134,7 @@ const CreateSurvey = ({ route }) => {
     }
 
     try {
-      const token = await AsyncStorage.getItem("access_token");
+      const token = await SecureStore.getItemAsync("access_token");
 
       const formData = new FormData();
       formData.append("survey_type", surveyType);

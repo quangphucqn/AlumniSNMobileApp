@@ -12,7 +12,7 @@ import {
   Alert,
 } from "react-native";
 import API, { getPostComments, authApis, endpoints, authAPI } from "../../configs/API";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import moment from "moment";
 import "moment/locale/vi";
 import * as ImagePicker from "expo-image-picker";
@@ -59,7 +59,7 @@ const PostDetailScreen = ({ route }) => {
   useEffect(() => {
     const fetchTokenAndPostDetails = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem("token");
+        const storedToken = await SecureStore.getItemAsync("token");
         console.log("Stored Token:", storedToken);
         if (!storedToken) {
           console.warn("No token found");
@@ -341,7 +341,7 @@ const PostDetailScreen = ({ route }) => {
 
   useEffect(() => {
     const fetchToken = async () => {
-      const storedToken = await AsyncStorage.getItem("access_token");
+      const storedToken = await SecureStore.getItemAsync("access_token");
       setToken(storedToken);
     };
 

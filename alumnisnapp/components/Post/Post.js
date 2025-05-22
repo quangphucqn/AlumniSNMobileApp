@@ -14,7 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { MyUserContext } from "../../configs/Context";
 import { endpoints } from "../../configs/API";
 import axios from "../../configs/API";
@@ -48,7 +48,7 @@ const CreatePostScreen = () => {
 
   const getToken = async () => {
     try {
-      return await AsyncStorage.getItem("access_token");
+      return await SecureStore.getItemAsync("access_token");
     } catch (error) {
       console.error("Lỗi lấy token:", error);
       return null;

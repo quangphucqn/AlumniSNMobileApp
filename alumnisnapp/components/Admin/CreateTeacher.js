@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
 import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 import * as FileSystem from 'expo-file-system';
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -40,7 +40,7 @@ export default function CreateTeacher() {
     }
     setLoading(true);
     try {
-      const accessToken = await AsyncStorage.getItem('access_token');
+      const accessToken = await SecureStore.getItemAsync('access_token');
       if (!accessToken) {
         setErrorMsg('Không tìm thấy access token.');
         setLoading(false);

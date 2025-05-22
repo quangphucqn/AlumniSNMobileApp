@@ -1,10 +1,10 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Modal } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { api } from '../../configs/API';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
 import { CLIENT_ID, CLIENT_SECRET } from '@env';
@@ -68,7 +68,11 @@ export default function Login({ navigation, route }) {
       navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
     } else {
       Alert.alert('Lỗi', 'Tài khoản không hợp lệ!');
-      await AsyncStorage.multiRemove(['access_token', 'user']);
+      await Promise.all([
+        SecureStore.deleteItemAsync('access_token'),
+        SecureStore.deleteItemAsync('refresh_token'),
+        SecureStore.deleteItemAsync('user')
+      ]);
       dispatch({ type: 'logout' });
     }
   };
@@ -88,8 +92,10 @@ export default function Login({ navigation, route }) {
       formData.append('client_secret', CLIENT_SECRET);
       const response = await api.login(formData);
       if (response.data.access_token) {
-        await AsyncStorage.setItem('access_token', response.data.access_token);
-        await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
+        // Lưu username của lần đăng nhập cuối cùng
+        await SecureStore.setItemAsync('lastLoginUsername', username);
+        await SecureStore.setItemAsync('access_token', response.data.access_token);
+        await SecureStore.setItemAsync('refresh_token', response.data.refresh_token);
         const userResponse = await api.getCurrentUser(response.data.access_token);
         const user = userResponse.data;
         if (user.role === 1 && !user.is_verified) {
@@ -118,6 +124,20 @@ export default function Login({ navigation, route }) {
   // Đăng nhập bằng khuôn mặt
   const handleFaceLogin = async () => {
     try {
+      const lastUsername = await SecureStore.getItemAsync('lastLoginUsername');
+      console.log('Last username:', lastUsername);
+      if (!lastUsername) {
+        Alert.alert('Thông báo', 'Vui lòng đăng nhập bằng mật khẩu trước khi sử dụng xác thực khuôn mặt.');
+        return;
+      }
+
+      const isFaceIDEnabled = await AsyncStorage.getItem(`faceIDEnabled_${lastUsername}`);
+      console.log('Face ID status:', isFaceIDEnabled);
+      if (!isFaceIDEnabled) {
+        Alert.alert('Thông báo', 'Vui lòng bật xác thực khuôn mặt trong phần cài đặt.');
+        return;
+      }
+
       setLoading(true);
       const isAuthenticated = await authenticateWithBiometrics();
       console.log('Biometric result:', isAuthenticated);
@@ -125,7 +145,7 @@ export default function Login({ navigation, route }) {
         Alert.alert('Thông báo', 'Xác thực khuôn mặt thất bại!');
         return;
       }
-      const refreshToken = await AsyncStorage.getItem('refresh_token');
+      const refreshToken = await SecureStore.getItemAsync('refresh_token');
       console.log('Refresh token:', refreshToken);
       if (!refreshToken) {
         Alert.alert('Thông báo', 'Không tìm thấy refresh token. Vui lòng đăng nhập bằng mật khẩu.');
@@ -140,8 +160,8 @@ export default function Login({ navigation, route }) {
       const response = await api.login(formData);
       console.log('API response:', response.data);
       if (response.data.access_token) {
-        await AsyncStorage.setItem('access_token', response.data.access_token);
-        await AsyncStorage.setItem('refresh_token', response.data.refresh_token);
+        await SecureStore.setItemAsync('access_token', response.data.access_token);
+        await SecureStore.setItemAsync('refresh_token', response.data.refresh_token);
         const userResponse = await api.getCurrentUser(response.data.access_token);
         const user = userResponse.data;
         await handleLoginSuccess(user);
@@ -229,7 +249,7 @@ export default function Login({ navigation, route }) {
               onPress={handleFaceLogin}
               disabled={loading}
             >
-              <MaterialCommunityIcons name="face-recognition" size={24} color="black" />
+              <Image source={require('../../assets/face-id.png')} style={{ width: 35, height: 35, color:'black' }} />
             </TouchableOpacity>
           </View>
         </View>
@@ -251,7 +271,11 @@ export default function Login({ navigation, route }) {
             <TouchableOpacity
               onPress={async () => {
                 setShowVerifyModal(false);
-                await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+                await Promise.all([
+                  SecureStore.deleteItemAsync('access_token'),
+                  SecureStore.deleteItemAsync('refresh_token'),
+                  SecureStore.deleteItemAsync('user')
+                ]);
                 dispatch({ type: 'logout' });
               }}
               style={UserStyles.modalButton}
@@ -307,7 +331,11 @@ export default function Login({ navigation, route }) {
             <TouchableOpacity
               onPress={async () => {
                 setShowExpiredPasswordModal(false);
-                await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+                await Promise.all([
+                  SecureStore.deleteItemAsync('access_token'),
+                  SecureStore.deleteItemAsync('refresh_token'),
+                  SecureStore.deleteItemAsync('user')
+                ]);
                 dispatch({ type: 'logout' });
               }}
               style={UserStyles.modalButton}

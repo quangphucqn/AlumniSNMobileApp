@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect } from "react";
 import { MyUserContext } from "../configs/Context";
 import MyUserReducer, { initialState } from "../reducer/MyUserReducer";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { api } from '../configs/API';
 
 export default function MyUserProvider({ children }) {
@@ -12,14 +12,27 @@ export default function MyUserProvider({ children }) {
     const loadUser = async () => {
       dispatch({ type: 'setLoading', payload: true });
       try {
-        const token = await AsyncStorage.getItem('access_token');
+        const token = await SecureStore.getItemAsync('access_token');
         if (token) {
           // Gọi API lấy user mới nhất
           const res = await api.getCurrentUser(token);
           const user = res.data;
           // Nếu user chưa xác thực thì logout và xóa token
           if (user.role === 1 && user.is_verified === false) {
-            await AsyncStorage.multiRemove(['access_token', 'refresh_token', 'user']);
+            await Promise.all([
+              SecureStore.deleteItemAsync('access_token'),
+              SecureStore.deleteItemAsync('refresh_token'),
+              SecureStore.deleteItemAsync('user')
+            ]);
+            dispatch({ type: 'logout' });
+            return;
+          }
+          if(user.role === 2 && user.must_change_password === true && user.password_reset_time__lt(datetime.now())){
+            await Promise.all([
+              SecureStore.deleteItemAsync('access_token'),
+              SecureStore.deleteItemAsync('refresh_token'),
+              SecureStore.deleteItemAsync('user')
+            ]);
             dispatch({ type: 'logout' });
             return;
           }
@@ -35,7 +48,7 @@ export default function MyUserProvider({ children }) {
     loadUser();
   }, []);
 
-  // Không lưu user vào AsyncStorage nữa để luôn đồng bộ với server
+  // Không lưu user vào SecureStore nữa để luôn đồng bộ với server
 
   return (
     <MyUserContext.Provider value={{ state, dispatch }}>

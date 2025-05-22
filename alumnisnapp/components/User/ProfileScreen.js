@@ -10,7 +10,7 @@ import {
 import { ActivityIndicator } from "react-native-paper";
 import { PostItem } from "../Post/PostItem";
 import API, { authAPI, endpoints } from "../../configs/API";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from "@react-navigation/native";
 
 const MyPostsScreen = () => {
@@ -22,8 +22,8 @@ const MyPostsScreen = () => {
   useEffect(() => {
     const fetchToken = async () => {
       try {
-        const storedToken = await AsyncStorage.getItem("access_token");
-        console.log("token 1", storedToken);
+        const storedToken = await SecureStore.getItemAsync("access_token");
+        console.log("token 1", storedToken)
         setToken(storedToken);
       } catch (error) {
         console.error("Failed to fetch token:", error);

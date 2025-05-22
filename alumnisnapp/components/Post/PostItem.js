@@ -11,7 +11,7 @@ import {
 } from "../../configs/API";
 import { theme } from "../Post/theme";
 import { MyUserContext } from "../../configs/Context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import moment from "moment";
 import "moment/locale/vi";
 import { IconButton } from "react-native-paper";
@@ -42,7 +42,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
   const [showReactions, setShowReactions] = useState(false);
   const fetchPostData = async () => {
     try {
-      const token = await AsyncStorage.getItem("access_token");
+      const token = await SecureStore.getItemAsync("access_token");
 
       const comments = await getPostComments(post.id, token);
       setCommentCount(comments.length);
@@ -80,7 +80,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
       selectedReaction
     );
     try {
-      const token = await AsyncStorage.getItem("access_token");
+      const token = await SecureStore.getItemAsync("access_token");
       const api = authAPI(token);
 
       if (selectedReaction === reactionId) {

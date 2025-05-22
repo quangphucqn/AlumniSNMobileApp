@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { getFirestore, collection, query, orderBy, onSnapshot, limit, startAfter, addDoc, doc } from "firebase/firestore";
 import { app } from '../../configs/firebaseConfig';
@@ -31,7 +31,7 @@ export default function ChatRoomDetail() {
     console.log('roomId type:', typeof roomId);
     (async () => {
       try {
-        const token = await AsyncStorage.getItem('access_token');
+        const token = await SecureStore.getItemAsync('access_token');
         const res = await api.getChatRoomDetail(token, roomId);
         console.log('Room info received:', res.data);
         setRoomInfo(res.data);
@@ -43,13 +43,14 @@ export default function ChatRoomDetail() {
 
   // Khi vào phòng chat
   useEffect(() => {
+    setMessages([]); // Reset lại state khi vào phòng chat mới
     console.log('Setting up Firestore listener with roomId:', roomId);
 
     let unsub;
     (async () => {
       setLoading(true);
       try {
-        const token = await AsyncStorage.getItem('access_token');
+        const token = await SecureStore.getItemAsync('access_token');
 
         // Thiết lập lắng nghe Firestore
         const messagesCol = collection(db, 'chat_rooms', String(roomId), 'messages');
@@ -65,45 +66,24 @@ export default function ChatRoomDetail() {
                 return { ...data, id: doc.id };
               });
 
-              // Sử dụng hàm cập nhật state để tránh closure problems
-              setMessages(prevMessages => {
-                // Tạo Map từ Firestore
-                const messageMap = new Map();
-                firestoreMessages.forEach(msg => {
-                  messageMap.set(msg.id, msg);
-                });
+              console.log('firestoreMessages:', firestoreMessages);
 
-                // Loại bỏ các tin nhắn tạm đã được gửi thành công (dựa vào content, sender_id, và trạng thái)
-                const filteredPrev = prevMessages.filter(msg => {
-                  // Nếu là tin nhắn tạm (id bắt đầu bằng 'temp-')
-                  if (typeof msg.id === 'string' && msg.id.startsWith('temp-')) {
-                    // Nếu đã có tin nhắn thật trùng content, sender_id và chưa lỗi thì loại bỏ
-                    return !firestoreMessages.some(fm =>
-                      fm.content === msg.content &&
-                      String(fm.sender_id) === String(msg.sender_id)
-                    );
-                  }
-                  return true;
-                });
-                // Thêm các tin nhắn cũ chưa có trong Firestore
-                filteredPrev.forEach(msg => {
-                  if (!messageMap.has(msg.id)) {
-                    messageMap.set(msg.id, msg);
-                  }
-                });
+              const normalizedMessages = firestoreMessages.map(normalizeTimestamp);
+              setMessages(
+                normalizedMessages
+                  .filter(msg => !(typeof msg.id === 'string' && msg.id.startsWith('temp-')))
+                  .sort((a, b) => {
+                    const getTime = (msg) => msg.timestamp ? msg.timestamp.getTime() : 0;
+                    return getTime(b) - getTime(a);
+                  })
+              );
 
-                // Chuyển Map thành mảng và sắp xếp theo thời gian
-                return Array.from(messageMap.values()).sort((a, b) => {
-                  const timeA = a.timestamp?.seconds ? a.timestamp.seconds * 1000 : new Date(a.timestamp).getTime();
-                  const timeB = b.timestamp?.seconds ? b.timestamp.seconds * 1000 : new Date(b.timestamp).getTime();
-                  return timeB - timeA; // Sắp xếp mới đến cũ
-                });
-              });
-
-              // Kiểm tra tin nhắn mới để đánh dấu đã đọc nếu cần
+              // Kiểm tra tin nhắn mới để đánh dấu đã đọc
               if (firestoreMessages.length > 0) {
                 const lastMsg = firestoreMessages[0];
-                if (lastMsg.sender_id && String(lastMsg.sender_id) !== String(currentUserId) && lastMsg.is_read === false) {
+                if (lastMsg.sender_id && 
+                    String(lastMsg.sender_id) !== String(currentUserId) && 
+                    lastMsg.is_read === false) {
                   api.markAsRead(token, roomId);
                 }
               }
@@ -116,31 +96,25 @@ export default function ChatRoomDetail() {
           console.error('Error setting up Firestore listener:', firestoreError);
         }
 
-        // Tải tin nhắn ban đầu từ API nếu cần
+        // Tải tin nhắn ban đầu từ API
         try {
           const res = await api.getMessages(token, roomId, null);
           const apiMessages = Array.isArray(res.data.results) ? res.data.results : [];
 
-          // Chỉ cập nhật từ API nếu có dữ liệu và chưa có từ Firestore
-          if (apiMessages.length > 0) {
-            setMessages(prevMessages => {
-              // Chỉ thêm tin nhắn từ API nếu chưa có trong danh sách hiện tại
-              const existingIds = new Set(prevMessages.map(m => m.id));
-              const newMessages = apiMessages.filter(m => !existingIds.has(m.id));
-              if (newMessages.length === 0) return prevMessages;
-
-              // Kết hợp và sắp xếp lại
-              return [...prevMessages, ...newMessages].sort((a, b) => {
-                const timeA = a.timestamp?.seconds ? a.timestamp.seconds * 1000 : new Date(a.timestamp).getTime();
-                const timeB = b.timestamp?.seconds ? b.timestamp.seconds * 1000 : new Date(b.timestamp).getTime();
-                return timeB - timeA;
-              });
-            });
+          const normalizedApiMessages = apiMessages.map(normalizeTimestamp);
+          if (normalizedApiMessages.length > 0) {
+            setMessages(
+              normalizedApiMessages
+                .filter(msg => !(typeof msg.id === 'string' && msg.id.startsWith('temp-')))
+                .sort((a, b) => {
+                  const getTime = (msg) => msg.timestamp ? msg.timestamp.getTime() : 0;
+                  return getTime(b) - getTime(a);
+                })
+            );
           }
         } catch (apiError) {
           console.error('Error fetching messages from API:', apiError);
         }
-
       } catch (error) {
         console.error('Error in chat setup:', error);
       } finally {
@@ -154,7 +128,7 @@ export default function ChatRoomDetail() {
         console.log('Listener unsubscribed');
       }
     };
-  }, [roomId, currentUserId])
+  }, [roomId, currentUserId]);
 
   // Khi scroll lên để lấy tin nhắn cũ
   const loadMore = async () => {
@@ -164,7 +138,7 @@ export default function ChatRoomDetail() {
     console.log('Loading more messages...');
 
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const lastMsgId = messages.length > 0 ? messages[messages.length - 1]?.id : null;
 
       console.log('Loading messages before ID:', lastMsgId);
@@ -195,7 +169,7 @@ export default function ChatRoomDetail() {
   // Gửi tin nhắn
   const handleSend = async () => {
     if (!input.trim()) return;
-    const token = await AsyncStorage.getItem('access_token');
+    const token = await SecureStore.getItemAsync('access_token');
     const tempId = 'temp-' + Date.now().toString(); // Thêm tiền tố để tránh trùng với ID từ Firestore
     const tempMsg = {
       id: tempId,
@@ -233,6 +207,19 @@ export default function ChatRoomDetail() {
     }
   };
 
+  const normalizeTimestamp = (msg) => {
+    if (!msg.timestamp) return { ...msg, timestamp: null };
+    if (typeof msg.timestamp.toDate === 'function') {
+      return { ...msg, timestamp: msg.timestamp.toDate() };
+    }
+    if (msg.timestamp.seconds) {
+      return { ...msg, timestamp: new Date(msg.timestamp.seconds * 1000) };
+    }
+    if (typeof msg.timestamp === 'string' || typeof msg.timestamp === 'number') {
+      return { ...msg, timestamp: new Date(msg.timestamp) };
+    }
+    return { ...msg, timestamp: null };
+  };
 
   // Render tin nhắn
   const renderMessage = ({ item }) => {
@@ -255,24 +242,8 @@ export default function ChatRoomDetail() {
 
     // Format timestamp
     let timeDisplay = '';
-    if (item.timestamp) {
-      try {
-        let msgTime;
-        if (typeof item.timestamp.toDate === 'function') {
-          // Firestore Timestamp object
-          msgTime = item.timestamp.toDate();
-        } else if (item.timestamp.seconds) {
-          // Firestore Timestamp plain object
-          msgTime = new Date(item.timestamp.seconds * 1000);
-        } else if (typeof item.timestamp === 'string' || typeof item.timestamp === 'number') {
-          msgTime = new Date(item.timestamp);
-        }
-        if (msgTime && !isNaN(msgTime)) {
-          timeDisplay = msgTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-      } catch (e) {
-        console.error('Error formatting timestamp:', e, item.timestamp);
-      }
+    if (item.timestamp instanceof Date && !isNaN(item.timestamp)) {
+      timeDisplay = item.timestamp.toLocaleString('vi-VN', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' });
     }
 
     return (
@@ -347,7 +318,7 @@ export default function ChatRoomDetail() {
       </View>
     );
   };
-
+  
   return (
     <SafeAreaView style={ChatRoomStyles.container}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -376,10 +347,6 @@ export default function ChatRoomDetail() {
         )}
         {/* Input */}
         <View style={{ flexDirection: 'row', alignItems: 'center', padding: 10, borderTopWidth: 0.5, borderColor: '#eee', backgroundColor: '#fff' }}>
-          {/* Nút sticker */}
-          <TouchableOpacity style={{ marginRight: 8 }}>
-            <Text style={{ fontSize: 22 }}>😊</Text>
-          </TouchableOpacity>
           {/* Ô nhập */}
           <TextInput
             style={{ flex: 1, borderWidth: 0.5, borderColor: '#ddd', borderRadius: 20, paddingHorizontal: 14, paddingVertical: 8, fontSize: 16, backgroundColor: '#f6f7fb' }}
@@ -392,7 +359,7 @@ export default function ChatRoomDetail() {
           <TouchableOpacity onPress={handleSend} style={{ marginLeft: 8 }}>
             <Text style={{ fontSize: 30, color: '#2563eb' }}>➤</Text>
           </TouchableOpacity>
-        </View>
+    </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

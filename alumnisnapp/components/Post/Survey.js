@@ -5,7 +5,7 @@ import { authAPI, endpoints, getSurveyData } from "../../configs/API";
 import { getValidImageUrl } from "../Post/PostItem";
 import moment from "moment";
 import "moment/locale/vi";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { useNavigation } from "@react-navigation/native";
 
 moment.locale("vi");
@@ -27,7 +27,7 @@ const Survey = ({ route }) => {
 
 useEffect(() => {
   const fetchInitialData = async () => {
-    const storedToken = await AsyncStorage.getItem("access_token");
+    const storedToken = await SecureStore.getItemAsync("access_token");
     console.log("Token:", storedToken);
     setToken(storedToken);
 

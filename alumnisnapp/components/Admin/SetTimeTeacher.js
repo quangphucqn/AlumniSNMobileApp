@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { api } from '../../configs/API';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 import styles from './AdminStyles';
 
 function formatVNTime(isoString) {
@@ -32,7 +32,7 @@ export default function SetTimeTeacher() {
     if (pageNum === 1) setLoading(true);
     else setIsLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const res = await api.getTeachersExpiredPassword(token, q, pageNum);
       const users = res.data.results || res.data;
       setData(prev => {
@@ -81,7 +81,7 @@ export default function SetTimeTeacher() {
   const handleSetTime = async (id) => {
     setSettingId(id);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       await api.setPasswordResetTime(token, id);
       Alert.alert('Thành công', 'Đã chỉnh lại thời gian đổi mật khẩu!');
       fetchTeachers(search.trim(), 1, false);

@@ -151,7 +151,7 @@ function MainTabs() {
           }
           return <Ionicons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: "#222",
+        tabBarActiveTintColor: "#2563eb",
         tabBarInactiveTintColor: "#888",
       })}
     >

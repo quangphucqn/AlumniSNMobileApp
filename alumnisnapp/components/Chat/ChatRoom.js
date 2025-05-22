@@ -1,14 +1,170 @@
 import React, { useEffect, useState, useCallback, useRef, useContext } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, Image, ActivityIndicator, Modal, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { api } from '../../configs/API';
+import * as SecureStore from 'expo-secure-store';
+import { api, getListUsers } from '../../configs/API';
 import { getFirestore, collection, query, orderBy, onSnapshot, limit, doc, updateDoc } from "firebase/firestore";
 import { app } from '../../configs/firebaseConfig';
 import { MyUserContext } from '../../configs/Context';
 import ChatRoomStyles from './ChatRoomStyles';
 
 const db = getFirestore(app);
+
+// Component Modal danh sách người dùng
+const UserListModal = ({ visible, onClose, onSelectUser, currentUserId }) => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const searchTimeout = useRef(null);
+
+  const loadUsers = async (query = '', pageNum = 1, append = false) => {
+    if (pageNum === 1) setLoading(true);
+    else setLoadingMore(true);
+    try {
+      const token = await SecureStore.getItemAsync('access_token');
+      const list = await getListUsers(token, query, pageNum);
+      setUsers(prev => {
+        if (!append) return list.results || list;
+        const map = new Map();
+        [...prev, ...(list.results || list)].forEach(u => map.set(u.id, u));
+        return Array.from(map.values());
+      });
+      setHasMore(!!(list.next));
+      setPage(pageNum);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      Alert.alert('Lỗi', 'Không thể tải danh sách người dùng');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      loadUsers('', 1, false);
+    } else {
+      // Reset state khi đóng modal
+      setSearchQuery('');
+      setUsers([]);
+      setPage(1);
+      setHasMore(true);
+    }
+  }, [visible]);
+
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    // Clear timeout cũ nếu có
+    if (searchTimeout.current) {
+      clearTimeout(searchTimeout.current);
+    }
+    // Set timeout mới
+    searchTimeout.current = setTimeout(() => {
+      loadUsers(text, 1, false);
+    }, 500);
+  };
+
+  // Clear timeout khi component unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  }, []);
+
+  const handleLoadMore = () => {
+    if (!loading && !loadingMore && hasMore) {
+      loadUsers(searchQuery, page + 1, true);
+    }
+  };
+
+  const renderUser = ({ item }) => {
+    const isCurrentUser = String(item.id) === String(currentUserId);
+    return (
+      <TouchableOpacity
+        style={ChatRoomStyles.userItem}
+        onPress={() => onSelectUser(item)}
+        disabled={isCurrentUser}
+      >
+        <Image
+          source={{ uri: item.avatar || 'https://via.placeholder.com/100' }}
+          style={ChatRoomStyles.userAvatar}
+        />
+        <View style={ChatRoomStyles.userInfo}>
+          <Text style={ChatRoomStyles.userName}>
+            {item.last_name} {item.first_name}
+          </Text>
+          {isCurrentUser && (
+            <Text style={ChatRoomStyles.userLabel}>(Bạn)</Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={onClose}
+    >
+      <View style={ChatRoomStyles.modalOverlay}>
+        <View style={ChatRoomStyles.modalContainer}>
+          <View style={ChatRoomStyles.modalHeader}>
+            <Text style={ChatRoomStyles.modalTitle}>
+              Tin nhắn mới
+            </Text>
+            <TouchableOpacity onPress={onClose}>
+              <Ionicons name="close" size={24} color="#000" />
+            </TouchableOpacity>
+          </View>
+          
+          <View style={ChatRoomStyles.searchContainer}>
+            <Ionicons name="search-outline" size={20} color="#666" />
+            <TextInput
+              style={ChatRoomStyles.searchInput}
+              placeholder="Tìm kiếm người dùng..."
+              value={searchQuery}
+              onChangeText={handleSearch}
+            />
+            {searchQuery !== '' && (
+              <TouchableOpacity
+                onPress={() => handleSearch('')}
+                style={ChatRoomStyles.clearButton}
+              >
+                <Ionicons name="close-circle" size={20} color="#666" />
+              </TouchableOpacity>
+            )}
+          </View>
+          
+          <FlatList
+            data={users}
+            renderItem={renderUser}
+            keyExtractor={item => String(item.id)}
+            onEndReached={handleLoadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={() => loadingMore && (
+              <ActivityIndicator style={ChatRoomStyles.loadingMore} />
+            )}
+            ListEmptyComponent={() => loading ? (
+              <ActivityIndicator style={ChatRoomStyles.loadingIndicator} size="large" color="#2563eb" />
+            ) : (
+              <Text style={ChatRoomStyles.emptyText}>
+                Không tìm thấy người dùng nào
+              </Text>
+            )}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+};
 
 export default function ChatRoom({ navigation }) {
   const [rooms, setRooms] = useState([]);
@@ -19,6 +175,7 @@ export default function ChatRoom({ navigation }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [lastMessages, setLastMessages] = useState({});
   const [refreshing, setRefreshing] = useState(false);
+  const [showUserList, setShowUserList] = useState(false);
 
   const listenersRef = useRef({});
   const { state } = useContext(MyUserContext);
@@ -29,7 +186,7 @@ export default function ChatRoom({ navigation }) {
     if (pageNum === 1) setLoading(true);
     else setLoadingMore(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       console.log('Fetching page:', pageNum);
       const res = await api.getChatRooms(token, q, pageNum);
       const list = res.data.results || res.data;
@@ -115,7 +272,7 @@ useEffect(() => {
     const missingRoomIds = listenedRoomIds.filter(roomId => !currentRoomIds.has(String(roomId)));
     
     if (missingRoomIds.length > 0) {
-      const token = await AsyncStorage.getItem('access_token');
+      const token = await SecureStore.getItemAsync('access_token');
       const newRooms = [];
       
       for (const roomId of missingRoomIds) {
@@ -192,18 +349,22 @@ useEffect(() => {
     console.log('renderRoom', item.id, lastMessages[item.id]);
     return (
       <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', padding: 12, backgroundColor: isUnread ? '#e6f0ff' : '#fff' }}
+        style={[
+          ChatRoomStyles.chatRoomItem,
+          isUnread ? ChatRoomStyles.chatRoomItemUnread : ChatRoomStyles.chatRoomItemRead
+        ]}
         onPress={() => navigation.navigate('ChatRoomDetail', { roomId: item.id })}
       >
-        <Image source={{ uri: otherUser.avatar || 'https://via.placeholder.com/100' }} style={{ width: 48, height: 48, borderRadius: 24, marginLeft: 12, backgroundColor: '#eee' }} />
-        <View style={{ flex: 1, marginLeft: 12 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{otherUser.last_name} {otherUser.first_name}</Text>
+        <Image 
+          source={{ uri: otherUser.avatar || 'https://via.placeholder.com/100' }} 
+          style={ChatRoomStyles.chatRoomAvatar} 
+        />
+        <View style={ChatRoomStyles.chatRoomContent}>
+          <Text style={ChatRoomStyles.chatRoomName}>
+            {otherUser.last_name} {otherUser.first_name}
+          </Text>
           <Text
-            style={{
-              color: isUnread ? '#222' : '#888',
-              fontSize: 13,
-              fontWeight: isUnread ? 'bold' : 'normal',
-            }}
+            style={isUnread ? ChatRoomStyles.lastMessageUnread : ChatRoomStyles.lastMessageRead}
             numberOfLines={1}
           >
             {lastMsg}
@@ -213,40 +374,61 @@ useEffect(() => {
     );
   };
 
+  // Xử lý khi chọn user để chat
+  const handleSelectUser = async (selectedUser) => {
+    try {
+      if (String(selectedUser.id) === String(currentUserId)) {
+        Alert.alert('Thông báo', 'Bạn không thể nhắn tin cho chính mình');
+        return;
+      }
+
+      // Kiểm tra xem đã có phòng chat với user này chưa
+      const token = await SecureStore.getItemAsync('access_token');
+      const existingRoom = rooms.find(room => 
+        String(room.other_user?.id) === String(selectedUser.id)
+      );
+
+      if (existingRoom) {
+        navigation.navigate('ChatRoomDetail', { roomId: existingRoom.id });
+      } else {
+        // Tạo phòng chat mới
+        const response = await api.createChatRoom(token, {
+          user_id: selectedUser.id
+        });
+        
+        if (response.data) {
+          navigation.navigate('ChatRoomDetail', { roomId: response.data.id });
+        }
+      }
+      setShowUserList(false);
+    } catch (error) {
+      console.error('Error handling user selection:', error);
+      Alert.alert('Lỗi', 'Không thể tạo cuộc trò chuyện. Vui lòng thử lại sau.');
+    }
+  };
+
   return (
     <SafeAreaView style={ChatRoomStyles.container}>
-      <View style={{ padding: 16, paddingBottom: 0 }}>
-        <Text style={{ fontSize: 28, fontWeight: 'bold', color: 'black' }}>Alumni Chat</Text>
+      <View style={ChatRoomStyles.chatRoomHeader}>
+        <Text style={ChatRoomStyles.chatRoomTitle}>Alumni Chat</Text>
+        <TouchableOpacity 
+          style={ChatRoomStyles.newChatButton}
+          onPress={() => setShowUserList(true)}
+        >
+          <Ionicons name="chatbubbles-outline" size={28} color="#2563eb" />
+        </TouchableOpacity>
         <View style={{ marginTop: 16, marginBottom: 8 }}>
           <TextInput
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              backgroundColor: '#f6f7fb',
-              borderRadius: 40,
-              marginHorizontal: 20,
-              marginBottom: 5,
-              paddingHorizontal: 12,
-              height: 43,
-              width: '95%',
-              borderWidth: 0.2,
-              borderColor: 'lightgray',
-              paddingVertical: 6,
-              shadowColor: 'gray',
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.04,
-              shadowRadius: 4,
-              elevation: 1,
-              alignSelf: 'center',
-            }}
+            style={ChatRoomStyles.searchBox}
             placeholder="Tìm kiếm..."
             value={search}
             onChangeText={setSearch}
           />
         </View>
       </View>
+
       {loading && page === 1 ? (
-        <ActivityIndicator style={{ marginTop: 32 }} size="large" color="#2563eb" />
+        <ActivityIndicator style={ChatRoomStyles.loadingIndicator} size="large" color="#2563eb" />
       ) : (
         <FlatList
           data={rooms}
@@ -256,11 +438,20 @@ useEffect(() => {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0}
           initialNumToRender={6}
-          ListFooterComponent={loadingMore ? <ActivityIndicator size={18} color="#2563eb" /> : null}
+          ListFooterComponent={loadingMore ? (
+            <ActivityIndicator style={ChatRoomStyles.loadingMore} size={18} color="#2563eb" />
+          ) : null}
           refreshing={refreshing}
           onRefresh={handleRefresh}
         />
       )}
+
+      <UserListModal
+        visible={showUserList}
+        onClose={() => setShowUserList(false)}
+        onSelectUser={handleSelectUser}
+        currentUserId={currentUserId}
+      />
     </SafeAreaView>
   );
 }

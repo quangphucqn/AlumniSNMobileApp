@@ -1,4 +1,4 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from 'expo-secure-store';
 import { useEffect, useState, useContext } from "react";
 import { MyUserContext } from "../../configs/Context";
 import {
@@ -68,7 +68,7 @@ const UpdatePost = ({ route }) => {
         route.params.origin === "HomeScreen"
       ) {
         const fetchSurvey = async () => {
-          const storedToken = await AsyncStorage.getItem("access_token");
+          const storedToken = await SecureStore.getItemAsync("access_token");
           console.log("Token:", storedToken);
           setToken(storedToken);
           const surveyData = await getSurveyData(post.id,storedToken);
@@ -100,7 +100,7 @@ const UpdatePost = ({ route }) => {
 
   const getToken = async () => {
     try {
-      const token = await AsyncStorage.getItem("access_token");
+      const token = await SecureStore.getItemAsync("access_token");
       if (token) return token;
       throw new Error("Không tìm thấy token.");
     } catch (error) {

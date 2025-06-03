@@ -14,7 +14,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import { MyUserContext } from "../../configs/Context";
 import { endpoints } from "../../configs/API";
 import axios from "../../configs/API";
@@ -30,12 +30,21 @@ const CreatePostScreen = () => {
 
   const isPostButtonEnabled = content.trim() !== "" || images.length > 0;
 
+
   const pickImages = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Lỗi", "Bạn cần cấp quyền truy cập thư viện ảnh.");
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       quality: 1,
     });
+
+    console.log("ImagePicker result:", result);
 
     if (!result.canceled) {
       setImages(result.assets);
@@ -96,7 +105,9 @@ const CreatePostScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.safeArea, { paddingTop: StatusBar.currentHeight }]}>
+    <SafeAreaView
+      style={[styles.safeArea, { paddingTop: StatusBar.currentHeight }]}
+    >
       <StatusBar barStyle="dark-content" />
       <View style={styles.container}>
         {/* HEADER */}

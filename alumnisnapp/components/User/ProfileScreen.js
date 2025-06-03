@@ -10,8 +10,8 @@ import {
 import { ActivityIndicator } from "react-native-paper";
 import { PostItem } from "../Post/PostItem";
 import API, { authAPI, endpoints } from "../../configs/API";
-import * as SecureStore from 'expo-secure-store';
-import { useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
+import { useNavigation,useFocusEffect } from "@react-navigation/native";
 
 const MyPostsScreen = () => {
   const [posts, setPosts] = useState([]);
@@ -23,7 +23,6 @@ const MyPostsScreen = () => {
     const fetchToken = async () => {
       try {
         const storedToken = await SecureStore.getItemAsync("access_token");
-        console.log("token 1", storedToken)
         setToken(storedToken);
       } catch (error) {
         console.error("Failed to fetch token:", error);
@@ -32,11 +31,12 @@ const MyPostsScreen = () => {
     fetchToken();
   }, []);
 
+
+
   const loadPosts = async () => {
     if (!token) return;
     setLoading(true);
     try {
-      console.log("token 2", token);
       const res = await authAPI(token).get(endpoints["my-posts"]);
       setPosts(res.data);
     } catch (error) {
@@ -50,6 +50,11 @@ const MyPostsScreen = () => {
     if (token) loadPosts();
   }, [token]);
 
+useFocusEffect(
+  React.useCallback(() => {
+    if (token) loadPosts();
+  }, [token])
+);
   const refresh = () => {
     loadPosts();
   };
@@ -77,38 +82,42 @@ const MyPostsScreen = () => {
   };
 
   const handlePostUpdation = (postId) => {
-    navigation.navigate("UpdatePostScreen", {
-      post: posts.find((post) => post.id === postId),
-      origin: "Profile",
+    navigation.navigate("Home", {
+      screen: "UpdatePostSceen",
+      params: {
+        post: posts.find((post) => post.id === postId),
+        origin: "Profile",
+      },
     });
   };
 
   return (
-    <View>
-      {posts.length === 0 && !loading ? (
-        <Text style={styles.noPostsText}>Bạn chưa có bài viết nào</Text>
-      ) : (
-        <>
-          <FlatList
-            data={posts}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listStyle}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <PostItem
-                post={item}
-                onPostDeleted={handlePostDeletion}
-                onPostUpdated={handlePostUpdation}
-              />
-            )}
-            refreshControl={
-              <RefreshControl refreshing={loading} onRefresh={refresh} />
-            }
-          />
-          {loading && <ActivityIndicator />}
-        </>
-      )}
-    </View>
+    <FlatList
+      data={posts}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.listStyle}
+      keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
+      renderItem={({ item }) =>
+        item ? (
+          <View style={styles.postWrapper}>
+            <PostItem
+              post={item}
+              onPostDeleted={handlePostDeletion}
+              onPostUpdated={handlePostUpdation}
+            />
+          </View>
+        ) : null
+      }
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={refresh} />
+      }
+      ListEmptyComponent={
+        !loading && (
+          <Text style={styles.noPostsText}>Bạn chưa có bài viết nào</Text>
+        )
+      }
+      ListFooterComponent={loading && <ActivityIndicator />}
+    />
   );
 };
 
@@ -117,11 +126,24 @@ export default MyPostsScreen;
 const styles = StyleSheet.create({
   listStyle: {
     paddingBottom: 100,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
   },
   noPostsText: {
     textAlign: "center",
     marginTop: 20,
     fontSize: 16,
     color: "gray",
+  },
+  postWrapper: {
+    marginBottom: 12,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });

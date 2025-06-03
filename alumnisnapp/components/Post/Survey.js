@@ -5,7 +5,7 @@ import { authAPI, endpoints, getSurveyData } from "../../configs/API";
 import { getValidImageUrl } from "../Post/PostItem";
 import moment from "moment";
 import "moment/locale/vi";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import { useNavigation } from "@react-navigation/native";
 
 moment.locale("vi");
@@ -25,39 +25,40 @@ const Survey = ({ route }) => {
   const [hasCompleted, setHasCompleted] = useState(false);
   const navigation = useNavigation();
 
-useEffect(() => {
-  const fetchInitialData = async () => {
-    const storedToken = await SecureStore.getItemAsync("access_token");
-    console.log("Token:", storedToken);
-    setToken(storedToken);
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      const storedToken = await SecureStore.getItemAsync("access_token");
+      console.log("Token:", storedToken);
+      setToken(storedToken);
 
-    if (storedToken) {
-      const surveyData = await getSurveyData(post.id,storedToken);
-      console.log("Survey Data:", surveyData);
-      setSurvey(surveyData);
+      if (storedToken) {
+        const surveyData = await getSurveyData(post.id, storedToken);
+        console.log("Survey Data:", surveyData);
+        setSurvey(surveyData);
 
-      try {
-        const res = await authAPI(storedToken).get(endpoints["resume"](post.id));
-        console.log("Resume API response:", res.data);
-        if (res.status === 200) {
-          setHasCompleted(res.data.has_completed);
-          if (res.data.answers) {
-            const formatted = res.data.answers.reduce((acc, ans) => {
-              acc[ans.question_id] = ans.selected_options;
-              return acc;
-            }, {});
-            setSelectedOptions(formatted);
+        try {
+          const res = await authAPI(storedToken).get(
+            endpoints["resume"](post.id)
+          );
+          console.log("Resume API response:", res.data);
+          if (res.status === 200) {
+            setHasCompleted(res.data.has_completed);
+            if (res.data.answers) {
+              const formatted = res.data.answers.reduce((acc, ans) => {
+                acc[ans.question_id] = ans.selected_options;
+                return acc;
+              }, {});
+              setSelectedOptions(formatted);
+            }
           }
+        } catch (err) {
+          console.error("Error fetching draft:", err);
         }
-      } catch (err) {
-        console.error("Error fetching draft:", err);
       }
-    }
-  };
+    };
 
-  fetchInitialData();
-}, [post.id]);
-
+    fetchInitialData();
+  }, [post.id]);
 
   const handleCheckboxChange = (questionId, optionId) => {
     setSelectedOptions((prev) => {
@@ -195,17 +196,7 @@ useEffect(() => {
               </View>
             </View>
             <Text style={styles.content}>{post.content}</Text>
-            {post.images?.length > 0 && (
-              <View style={styles.imagesContainer}>
-                {post.images.map((img, idx) => (
-                  <Image
-                    key={idx}
-                    source={{ uri: getValidImageUrl(img.image) }}
-                    style={styles.postImage}
-                  />
-                ))}
-              </View>
-            )}
+            {/* PHẦN HIỂN THỊ ẢNH MINH HỌA ĐÃ BỎ QUA */}
           </View>
 
           {survey?.questions ? (
@@ -297,11 +288,6 @@ const styles = StyleSheet.create({
   content: {
     fontSize: 14,
     margin: 10,
-  },
-  postImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
   },
   surveyType: {
     fontSize: 12,

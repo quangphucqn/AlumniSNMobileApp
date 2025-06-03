@@ -7,15 +7,13 @@ import {
   Switch,
   StyleSheet,
   Alert,
-  Image,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { IconButton, Button, Appbar } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import { authAPI, endpoints } from "../../configs/API";
-import * as ImagePicker from "expo-image-picker";
 
 const surveyTypes = [
   { label: "Training Program", value: 1 },
@@ -38,26 +36,7 @@ const CreateSurvey = ({ route }) => {
     ]
   );
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [image, setImage] = useState(null);
   const navigation = useNavigation();
-
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Lỗi", "Cần cấp quyền truy cập thư viện ảnh.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-
-    if (!result.canceled && result.assets.length > 0) {
-      setImage(result.assets[0].uri);
-    }
-  };
 
   const handleAddQuestion = () => {
     setQuestions([
@@ -142,19 +121,6 @@ const CreateSurvey = ({ route }) => {
       formData.append("content", content);
       formData.append("questions", JSON.stringify(questions));
 
-      if (image) {
-        const filename = image.split("/").pop();
-        const match = /\.(\w+)$/.exec(filename);
-        const ext = match?.[1];
-        const type = match ? `image/${ext}` : `image`;
-
-        formData.append("image", {
-          uri: image,
-          name: filename,
-          type,
-        });
-      }
-
       const res = await authAPI(token).post(endpoints["survey"], formData, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -218,22 +184,6 @@ const CreateSurvey = ({ route }) => {
             mode="date"
             display="default"
             onChange={handleDateChange}
-          />
-        )}
-
-        <Button
-          icon="image"
-          mode="outlined"
-          onPress={pickImage}
-          style={{ marginBottom: 16 }}
-        >
-          Chọn ảnh minh họa
-        </Button>
-
-        {image && (
-          <Image
-            source={{ uri: image }}
-            style={{ width: "100%", height: 200, marginBottom: 16, borderRadius: 8 }}
           />
         )}
 

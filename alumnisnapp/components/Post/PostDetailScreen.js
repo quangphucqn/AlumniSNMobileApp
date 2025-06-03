@@ -11,8 +11,8 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import API, { getPostComments, authApis, endpoints, authAPI } from "../../configs/API";
-import * as SecureStore from 'expo-secure-store';
+import API, { getPostComments, authAPI, endpoints } from "../../configs/API";
+import * as SecureStore from "expo-secure-store";
 import moment from "moment";
 import "moment/locale/vi";
 import * as ImagePicker from "expo-image-picker";
@@ -59,7 +59,7 @@ const PostDetailScreen = ({ route }) => {
   useEffect(() => {
     const fetchTokenAndPostDetails = async () => {
       try {
-        const storedToken = await SecureStore.getItemAsync("token");
+        const storedToken = await SecureStore.getItemAsync("access_token");
         console.log("Stored Token:", storedToken);
         if (!storedToken) {
           console.warn("No token found");
@@ -76,7 +76,7 @@ const PostDetailScreen = ({ route }) => {
         setPost(response.data);
         setCommentsLocked(response.data.lock_comment);
 
-        const data = await getPostComments(postId);
+        const data = await getPostComments(postId, storedToken);
         setComments(buildCommentTree(data));
       } catch (error) {
         console.error("Error fetching post details:", error);
@@ -131,7 +131,7 @@ const PostDetailScreen = ({ route }) => {
         },
       });
 
-      const data = await getPostComments(post.id);
+      const data = await getPostComments(post.id, token);
       setComments(buildCommentTree(data));
       if (onCommentAdded) {
         onCommentAdded(data.length);
@@ -143,7 +143,7 @@ const PostDetailScreen = ({ route }) => {
 
   const handleToggleCommentsLock = async () => {
     try {
-      const api = authApis(token);
+      const api = authAPI(token);
       await api.patch(`/post/${post.id}/lock-unlock-comment/`);
       setCommentsLocked(!commentsLocked);
     } catch (error) {
@@ -370,11 +370,15 @@ const PostDetailScreen = ({ route }) => {
           "Content-Type": "multipart/form-data",
         },
       });
-
+      console.log("Bình luận vừa gửi xong");
       setInputKey((prev) => prev + 1);
       setCommentImage(null);
-      const data = await getPostComments(post.id);
-      setComments(buildCommentTree(data));
+      const data = await getPostComments(post.id, token);
+      console.log("Dữ liệu từ API:", data);
+
+      const tree = buildCommentTree(data);
+      console.log("Cây comment:", tree);
+      setComments(tree);
       if (onCommentAdded) {
         onCommentAdded(data.length);
       }
@@ -397,7 +401,7 @@ const PostDetailScreen = ({ route }) => {
             const response = await authAPI(token).delete(
               endpoints["comment-detail"](commentId)
             );
-            const data = await getPostComments(post.id);
+            const data = await getPostComments(post.id, token);
             setComments(buildCommentTree(data));
             if (onCommentAdded) {
               onCommentAdded(data.length);
@@ -440,7 +444,7 @@ const PostDetailScreen = ({ route }) => {
 
       setReplyImage(null);
       setReplyingTo(null);
-      const data = await getPostComments(post.id);
+      const data = await getPostComments(post.id, token);
       setComments(buildCommentTree(data));
 
       if (onCommentAdded) {
@@ -735,4 +739,4 @@ export const styles = StyleSheet.create({
   },
 });
 
-export default PostDetailScreen;
+export default PostDetailScreen;  

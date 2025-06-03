@@ -118,7 +118,7 @@ function ProfileStackNavigator() {
       <ProfileStack.Screen
         name="ProfileScreen"
         component={ProfileScreen}
-        options={{ title: "Cá nhân" }}
+        options={{ headerShown: false }}
       />
       <ProfileStack.Screen
         name="SurveyScreen"

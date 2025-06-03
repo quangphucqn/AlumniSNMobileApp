@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-const BASE_URL = "http://192.168.1.8:8000";
+const BASE_URL = "http://192.168.1.3:8000";
 
 // Định nghĩa các endpoints
 export const endpoints = {
@@ -23,7 +23,8 @@ export const endpoints = {
   post: "/post/",
   "post-detail": (postId) => `/post/${postId}/`,
   "my-posts": "/post/my-posts/",
-  comments: (postId) => `/post/${postId}/comment/`,
+  comment: (postId) => `/post/${postId}/comment/`,
+  comments:(postId)=>`/post/${postId}/comments/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
   // Comment endpoints
@@ -85,9 +86,9 @@ export const getListUsers = async (
   }
 };
 
-export const getPostComments = async (postId, token) => {
+export const getPostComments = async (postId, accessToken) => {
   try {
-    const res = await authAPI(token).get(endpoints.comments(postId));
+    const res = await authAPI(accessToken).get(endpoints.comments(postId));
     return res.data;
   } catch (error) {
     console.error("Error fetching comments:", error);

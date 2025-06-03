@@ -11,7 +11,7 @@ import {
 } from "../../configs/API";
 import { theme } from "../Post/theme";
 import { MyUserContext } from "../../configs/Context";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import moment from "moment";
 import "moment/locale/vi";
 import { IconButton } from "react-native-paper";
@@ -20,11 +20,22 @@ moment.locale("vi");
 
 export const getValidImageUrl = (url) => {
   if (!url) return "";
-  if (url.startsWith("image/upload/")) {
-    return `https://res.cloudinary.com/dizuiutpe/${url}`;
+
+  // Nếu là URL đầy đủ nhưng bị lồng "image/upload/..." ở đầu => xóa phần lặp
+  if (url.startsWith("image/upload/https://")) {
+    return url.replace(/^image\/upload\//, "");
   }
-  return url;
+
+  // Nếu là URL đầy đủ, dùng luôn
+  if (url.startsWith("http")) return url;
+
+  // Nếu là đường dẫn tương đối => thêm domain Cloudinary
+  return `https://res.cloudinary.com/dizuiutpe/image/upload/${url}`;
 };
+
+
+
+
 
 export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
   const cleanAvatarUrlAvatar = post.user.avatar.replace(/^image\/upload\//, "");
@@ -163,18 +174,26 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           </View>
 
           <View style={{ flexDirection: "column", marginLeft: "auto" }}>
-            <FontAwesome
-              name="ellipsis-h"
-              size={hp(2.4)}
-              color={theme.colors.text}
-              style={styles.moreIcon}
+            <TouchableOpacity
               onPress={() =>
-                navigation.navigate("PostDetailScreen", {
-                  postId: post.id,
-                  onCommentAdded: updateCommentCount,
+                navigation.navigate("Home", {
+                  screen: "PostDetailScreen",
+                  params: {
+                    postId: post.id,
+                    onCommentAdded: updateCommentCount,
+                  },
                 })
               }
-            />
+              style={{ padding: 5, marginLeft: "auto" }}
+            >
+              <FontAwesome
+                name="ellipsis-h"
+                size={hp(2.4)}
+                color={theme.colors.text}
+                style={styles.moreIcon}
+              />
+            </TouchableOpacity>
+
             {post.object_type === "survey" && (
               <TouchableOpacity
                 onPress={() =>
@@ -195,14 +214,18 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
         <View style={styles.imagesContainer}>
           {post.images
             .filter((img) => img?.image)
-            .map((image) => (
-              <Image
-                key={`post-img-${image.id || image.image}`} // dùng id hoặc url ảnh làm key
-                source={{ uri: getValidImageUrl(image.image) }}
-                style={styles.postImage}
-                resizeMode="cover"
-              />
-            ))}
+            .map((image) => {
+              const uri = getValidImageUrl(image.image);
+              console.log("Image URI to render:", uri);
+              return (
+                <Image
+                  key={`post-img-${image.id || image.image}`}
+                  source={{ uri }}
+                  style={styles.postImage}
+                  resizeMode="cover"
+                />
+              );
+            })}
         </View>
       )}
 
@@ -256,17 +279,21 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           </View>
         )}
 
-        <FontAwesome
-          name="comment"
-          size={18}
-          color="#888"
+        <TouchableOpacity
           onPress={() =>
-            navigation.navigate("PostDetailScreen", {
-              postId: post.id,
-              onCommentAdded: updateCommentCount,
+            navigation.navigate("Home", {
+              screen: "PostDetailScreen",
+              params: {
+                postId: post.id,
+                onCommentAdded: updateCommentCount,
+              },
             })
           }
-        />
+          style={{ marginLeft: 10 }}
+        >
+          <FontAwesome name="comment" size={18} color="#888" />
+        </TouchableOpacity>
+
         <Text style={styles.interactionText}>{commentCount}</Text>
       </View>
     </View>

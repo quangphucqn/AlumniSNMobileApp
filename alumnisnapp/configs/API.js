@@ -2,13 +2,15 @@
 
 import axios from "axios";
 
-const BASE_URL = "http://192.168.1.8:8000";
+const BASE_URL = "http://192.168.1.9:8000";
 
 // Định nghĩa các endpoints
 export const endpoints = {
   // User endpoints
   login: "/o/token/",
   register: "/register/",
+  googleRegister: "/google-register/",
+  googleLogin: "/auth/convert-token/",
   user: "/user/",
   currentUser: "/user/current_user/",
   changePassword: "/user/change_password/",
@@ -42,8 +44,8 @@ export const endpoints = {
   groups: "/groups/",
 
   // Event endpoints
-  events: "/events/",
-  eventDetail: "/events/{id}/",
+  events: "/event_invite/",
+  eventDetail: (id) => `/event_invite/${id}/`,
 
   // Chat endpoints
   chats: "/chat/",
@@ -126,8 +128,25 @@ export const api = {
       },
     });
   },
-  register: (userData) => axios.post(endpoints.register, userData),
+  register: (userData) => axios.post(BASE_URL + endpoints.register, userData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Accept: "application/json",
+    },
+  }),
   logout: (accessToken) => authAPI(accessToken).post(endpoints.logout),
+  googleLogin: (data) => axios.post(BASE_URL + endpoints.googleLogin, data,{
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Accept: "application/json",
+    },
+  }),
+  googleRegister: (data) => axios.post(BASE_URL + endpoints.googleRegister, data,{
+    headers: {
+      "Content-Type": "multipart/form-data",
+      Accept: "application/json",
+    },
+  }),
   getCurrentUser: (accessToken) =>
     authAPI(accessToken).get(endpoints.currentUser),
 

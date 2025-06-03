@@ -35,7 +35,7 @@ const features = [
   },
   {
     key: 'eventinvite',
-    label: 'Đăng bài viết thông báo',
+    label: 'Đăng thư mời',
     icon: <Ionicons name="paper-plane" size={36} color="#FFCC33" />,
   },
 ];
@@ -44,7 +44,7 @@ export default function ManagementScreen() {
   const navigation = useNavigation();
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      <Text style={styles.title}>Chức năng quản trị</Text>
+      <Text style={styles.title}>Chức năng quản lý</Text>
       <View style={styles.grid}>
         {features.map((item) => (
           <TouchableOpacity
@@ -58,6 +58,7 @@ export default function ManagementScreen() {
               if (item.key === 'group') navigation.navigate('Groups');
               if (item.key === 'users') navigation.navigate('ManageUsers');
               if(item.key==='postservey') navigation.navigate('CreateSurvey');
+              if(item.key==='eventinvite') navigation.navigate('EventPost');
             }}
           >
             <View style={styles.iconWrapper}>{item.icon}</View>
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'space-between',     
   },
   square: {
     width: '47%',

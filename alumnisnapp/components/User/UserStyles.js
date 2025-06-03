@@ -14,6 +14,7 @@ const UserStyles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 24,
     marginTop: 8,
+    paddingTop: Platform.OS === 'ios' ? 5 : 20,
   },
   label: {
     fontSize: 15,
@@ -41,7 +42,7 @@ const UserStyles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   button: {
-    backgroundColor: 'black',
+    backgroundColor: '#2563eb',
     paddingVertical: 14,
     borderRadius: 10,
     alignItems: 'center',
@@ -58,6 +59,7 @@ const UserStyles = StyleSheet.create({
     color: '#fff',
     fontSize: 17,
     fontWeight: 'bold',
+    marginTop: 3,
   },
   buttonDisabled: {
     backgroundColor: '#a5b4fc',
@@ -148,9 +150,18 @@ const UserStyles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   modalButtonText: {
-    color: 'blue',
+    color: 'black',
     fontWeight: 'bold',
     fontSize: 16,
+    textAlign: 'center',
+  },
+  modalButtonMSSVText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+    textAlign: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   // Profile specific styles
   coverContainer: {
@@ -312,7 +323,7 @@ const UserStyles = StyleSheet.create({
   // Login, Register, EditProfile, ChangePassword specific
   backButton: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 10 : 20,
+    top: Platform.OS === 'ios' ? 10 : 40,
     left: 16,
     zIndex: 10,
     width: 40,
@@ -321,13 +332,14 @@ const UserStyles = StyleSheet.create({
     alignItems: 'center',
   },
   nextButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#2563eb',
     paddingVertical: 14,
     borderRadius: 10,
     height: 56,
     width: '100%',
     marginTop: 24,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   nextButtonText: {
     color: '#fff',
@@ -352,13 +364,14 @@ const UserStyles = StyleSheet.create({
     fontSize: 16,
   },
   registerButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#2563eb',
     paddingVertical: 14,
     borderRadius: 10,
     height: 56,
     width: '100%',
     marginTop: 24,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   orText: {
     color: '#888',

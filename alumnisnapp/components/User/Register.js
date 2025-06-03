@@ -16,6 +16,7 @@ export default function Register({ navigation }) {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState('');
   const [avatar, setAvatar] = useState(null);
   const [cover, setCover] = useState(null);
@@ -105,6 +106,7 @@ export default function Register({ navigation }) {
       Alert.alert('Thành công', 'Đăng ký thành công!');
       navigation.navigate('Login');
     } catch (error) {
+      console.log('Register error:', error, error.response);
       let message = 'Đăng ký thất bại. Vui lòng thử lại!';
       if (error.response && error.response.data) {
         if (typeof error.response.data === 'string') {
@@ -151,6 +153,7 @@ export default function Register({ navigation }) {
                   onChangeText={setLastName}
                   autoCorrect={true}
                   autoCapitalize="words"
+                  placeholderTextColor='darkgray'
                 />
               </View>
               <Text style={UserStyles.label}>Tên</Text>
@@ -210,10 +213,13 @@ export default function Register({ navigation }) {
                   style={UserStyles.input}
                   placeholder="Nhập mật khẩu"
                   value={password}
-                  secureTextEntry={true}
+                  secureTextEntry={!showPassword}
                   onChangeText={setPassword}
                   autoCapitalize="none"
                 />
+                <TouchableOpacity style={UserStyles.showPasswordButton} onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={24} color="darkgray" />
+                </TouchableOpacity>
               </View>
               <Text style={UserStyles.label}>Xác nhận mật khẩu</Text>
               <View style={UserStyles.inputContainer}>
@@ -222,9 +228,12 @@ export default function Register({ navigation }) {
                   placeholder="Nhập lại mật khẩu"
                   value={confirmPassword}
                   onChangeText={setConfirmPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                   autoCapitalize="none"
                 />
+                <TouchableOpacity style={UserStyles.showPasswordButton} onPress={() => setShowPassword(!showPassword)}>
+                  <Ionicons name={showPassword ? 'eye' : 'eye-off'} size={24} color="darkgray" />
+                </TouchableOpacity>
               </View>
               <TouchableOpacity style={UserStyles.nextButton} onPress={handleNext} disabled={loading}>
                 <Text style={UserStyles.nextButtonText}>Tiếp theo</Text>

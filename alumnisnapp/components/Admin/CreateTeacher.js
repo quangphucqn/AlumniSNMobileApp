@@ -149,6 +149,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 4,
     elevation: 2,
+    backgroundColor:'white',
+    borderColor:'white',
   },
   container: {
     flex: 1,

@@ -120,7 +120,7 @@ export default function AddUser() {
   };
 
   return (
-    <SafeAreaView style={[groupStyles.container, { flex: 1 }]}> 
+    <SafeAreaView style={[groupStyles.container, { flex: 1 }]} edges={['right', 'left']}> 
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: insets.top + 8, paddingLeft: 0, marginBottom: 8 }}>
         <TouchableOpacity style={[groupStyles.backBtn, { position: 'relative', top: 0, left: 0, marginTop: 0 }]} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />

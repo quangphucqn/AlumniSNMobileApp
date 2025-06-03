@@ -2,6 +2,7 @@
   "expo": {
     "name": "ALUMNI SOCIAL NETWORK",
     "slug": "alumnisnapp",
+    "scheme": "alumnisnapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/alumnis_icon.png",
@@ -26,6 +27,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7a231ecb-e4f9-456a-9f64-57dc1072aab8"
+      }
     }
   }
 }

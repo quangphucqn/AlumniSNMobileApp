@@ -33,6 +33,7 @@ import CreateSurveyScreen from "./components/Admin/CreateSurvey";
 import UpdatePostScreen from "./components/Post/UpdatePost";
 import PostDetailScreen from "./components/Post/PostDetailScreen";
 import SurveyScreen from "./components/Post/Survey";
+import EventPostScreen from "./components/Admin/EventPost";
 import UpdateSurveyScreen from "./components/Post/UpdateSurvey";
 import ChatRoomDetailScreen from "./components/Chat/ChatRoomDetail";
 const Stack = createNativeStackNavigator();
@@ -227,6 +228,7 @@ function AppContent() {
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
       <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
+      <Stack.Screen name="EventPost" component={EventPostScreen} />
     </Stack.Navigator>
   );
 }

@@ -99,6 +99,7 @@ export default function AddUser() {
           backgroundColor: alreadyInGroup ? '#f3f4f6' : (selected ? '#e0e7ff' : '#fff'),
           borderRadius: 8,
           marginBottom: 4,
+          height: 95,
           opacity: alreadyInGroup ? 0.5 : 1
         }}
         onPress={() => !alreadyInGroup && toggleSelectUser(item.id)}

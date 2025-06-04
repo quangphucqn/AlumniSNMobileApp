@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl, Switch,FlatList } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, ScrollView, Alert, RefreshControl, Switch } from 'react-native';
 import { Feather, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -179,114 +179,73 @@ function ProfileContent() {
     return null;
   }
 
-    return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <FlatList
-        data={[]}
-        ListHeaderComponent={
-          <View>
-            {/* Cover + Avatar */}
-            <View style={UserStyles.coverContainer}>
-              {user.cover ? (
-                <Image source={{ uri: user.cover }} style={UserStyles.coverImage} />
-              ) : (
-                <View style={UserStyles.coverPlaceholder} />
-              )}
-              <View style={UserStyles.avatarWrapper}>
-                <Image
-                  source={{ uri: user.avatar || "https://via.placeholder.com/150" }}
-                  style={UserStyles.avatarImage}
-                />
-              </View>
-              <View style={UserStyles.headerAbsolute}>
-                <TouchableOpacity onPress={() => navigation.openDrawer()}>
-                  <Feather name="menu" size={24} color="#222" />
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Thông tin cá nhân */}
-            <View style={UserStyles.infoRow}>
-              <Text style={UserStyles.profileName}>
-                {user.last_name} {user.first_name}
-              </Text>
-              <Text style={UserStyles.profileEmail}>{user.email}</Text>
-            </View>
-
-            {/* Hành động */}
-            <View style={UserStyles.buttonRow}>
-              <TouchableOpacity
-                style={UserStyles.actionButton}
-                onPress={() => navigation.navigate("EditProfile")}
-              >
-                <Text style={UserStyles.actionButtonText}>
-                  Chỉnh sửa trang cá nhân
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={UserStyles.actionButton}>
-                <Text style={UserStyles.actionButtonText}>
-                  Chia sẻ trang cá nhân
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* Tabs */}
-            <View style={UserStyles.tabs}>
-              <TouchableOpacity
-                style={[
-                  UserStyles.tabItem,
-                  activeTab === "posts" && UserStyles.tabActive,
-                ]}
-                onPress={() => setActiveTab("posts")}
-              >
-                <Text
-                  style={[
-                    UserStyles.tabText,
-                    activeTab === "posts" && UserStyles.tabTextActive,
-                  ]}
-                >
-                  Bài viết
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  UserStyles.tabItem,
-                  activeTab === "replies" && UserStyles.tabActive,
-                ]}
-                onPress={() => setActiveTab("replies")}
-              >
-                <Text
-                  style={[
-                    UserStyles.tabText,
-                    activeTab === "replies" && UserStyles.tabTextActive,
-                  ]}
-                >
-                  Bài viết đang trả lời
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        }
-        ListFooterComponent={
-          activeTab === "posts" ? (
-            <View style={{ flex: 1 }}>
-              <ProfileScreen />
-            </View>
-          ) : (
-            <View style={UserStyles.emptyState}>
-              <Text style={UserStyles.emptyText}>
-                Chưa có bài viết đang trả lời.
-              </Text>
-            </View>
-          )
-        }
-        keyExtractor={(_, index) => index.toString()}
+  return (
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#fff" }}
+      edges={["top", "left", "right"]}
+    >
+      <ScrollView
+        contentContainerStyle={{ paddingBottom: 80 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
-        contentContainerStyle={{ paddingBottom: 80 }}
-      />
+      >
+        {/* Cover + Avatar */}
+        <View style={UserStyles.coverContainer}>
+          {user.cover ? (
+            <Image source={{ uri: user.cover }} style={UserStyles.coverImage} />
+          ) : (
+            <View style={UserStyles.coverPlaceholder} />
+          )}
+          <View style={UserStyles.avatarWrapper}>
+            <Image
+              source={{ uri: user.avatar || "https://via.placeholder.com/150" }}
+              style={UserStyles.avatarImage}
+            />
+          </View>
+          <View style={UserStyles.headerAbsolute}>
+            <TouchableOpacity onPress={() => navigation.openDrawer()}>
+              <Feather name="menu" size={24} color="#222" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={UserStyles.infoRow}>
+          <Text style={UserStyles.profileName}>
+            {user.last_name} {user.first_name}
+          </Text>
+          <Text style={UserStyles.profileEmail}>{user.email}</Text>
+        </View>
+
+        <View style={UserStyles.buttonRow}>
+          <TouchableOpacity
+            style={UserStyles.actionButton}
+            onPress={() => navigation.navigate("EditProfile")}
+          >
+            <Text style={UserStyles.actionButtonText}>
+              Chỉnh sửa trang cá nhân
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={UserStyles.actionButton}>
+            <Text style={UserStyles.actionButtonText}>
+              Chia sẻ trang cá nhân
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Nội dung tabs */}
+        {activeTab === "posts" ? (
+          <View style={{ marginTop: 10 }}>
+            <ProfileScreen />
+          </View>
+        ) : (
+          <View style={UserStyles.emptyState}>
+            <Text style={UserStyles.emptyText}>
+              Chưa có bài viết đang trả lời.
+            </Text>
+          </View>
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

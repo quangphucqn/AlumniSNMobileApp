@@ -6,6 +6,7 @@ import { api } from '../../configs/API';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { getValidImageUrl } from '../Post/PostItem';
 
 const ROLE_OPTIONS = [
   { label: 'Tất cả', value: '' },
@@ -238,10 +239,17 @@ export default function EventPost() {
         data.append('send_to_all', recipientType === 'all');
         selectedGroups.forEach(id => data.append('groups', id));
         selectedUsers.forEach(id => data.append('individuals', id));
+        // xác định định dạng ảnh
+        const getMimeType = (filename) => {
+          const ext = filename.split('.').pop().toLowerCase();
+          if (ext === 'png') return 'image/png';
+          if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+          return 'application/octet-stream';
+        };
         data.append('images', {
           uri: image.uri,
           name: image.fileName || 'event.jpg',
-          type: image.type || 'image/jpeg',
+          type: getMimeType(image.fileName || 'event.jpg'),
         });
         isFormData = true;
       } else {
@@ -254,6 +262,7 @@ export default function EventPost() {
         };
       }
       const res = await api.createEvent(token, data, isFormData);
+      console.log('API response:', res.data);
       Alert.alert('Thành công', 'Đã đăng thư mời!', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);

@@ -49,6 +49,7 @@ const groupStyles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 12,
     padding: 24,
+    height: 110,
   },
   iconBox: {
     width: 56,
@@ -115,7 +116,7 @@ const groupStyles = StyleSheet.create({
     backgroundColor: '#f6f7fb',
     borderRadius: 12,
     marginBottom: 12,
-    height: 75,
+    height: 90,
     padding: 14,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },

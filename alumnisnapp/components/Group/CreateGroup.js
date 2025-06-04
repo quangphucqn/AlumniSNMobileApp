@@ -101,7 +101,7 @@ export default function CreateGroup() {
     const selected = selectedUserIds.includes(item.id);
     return (
       <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8, backgroundColor: selected ? '#e0e7ff' : '#fff', borderRadius: 8, marginBottom: 4 }}
+        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8, backgroundColor: selected ? '#e0e7ff' : '#fff', borderRadius: 8, marginBottom: 4 ,height: 80}}
         onPress={() => toggleSelectUser(item.id)}
         activeOpacity={0.7}
       >

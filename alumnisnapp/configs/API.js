@@ -2,9 +2,7 @@
 
 import axios from "axios";
 
-
-const BASE_URL = "http://192.168.1.3:8000";
-
+const BASE_URL = "http://192.168.1.9:8000";
 
 // Định nghĩa các endpoints
 export const endpoints = {
@@ -27,8 +25,7 @@ export const endpoints = {
   post: "/post/",
   "post-detail": (postId) => `/post/${postId}/`,
   "my-posts": "/post/my-posts/",
-  comment: (postId) => `/post/${postId}/comment/`,
-  comments:(postId)=>`/post/${postId}/comments/`,
+  comments: (postId) => `/post/${postId}/comment/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
   // Comment endpoints
@@ -90,9 +87,9 @@ export const getListUsers = async (
   }
 };
 
-export const getPostComments = async (postId, accessToken) => {
+export const getPostComments = async (postId, token) => {
   try {
-    const res = await authAPI(accessToken).get(endpoints.comments(postId));
+    const res = await authAPI(token).get(endpoints.comments(postId));
     return res.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -180,7 +177,12 @@ export const api = {
   // Event APIs
   getEvents: (accessToken) => authAPI(accessToken).get(endpoints.events),
   createEvent: (accessToken, data) =>
-    authAPI(accessToken).post(endpoints.events, data),
+    authAPI(accessToken).post(endpoints.events, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   updateEvent: (accessToken, id, data) =>
     authAPI(accessToken).patch(`${endpoints.events}/${id}/`, data),
   deleteEvent: (accessToken, id) =>
@@ -223,9 +225,19 @@ export const api = {
   changePassword: (accessToken, data) =>
     authAPI(accessToken).patch(endpoints.changePassword, data),
   updateAvatar: (accessToken, data) =>
-    authAPI(accessToken).patch(endpoints.updateAvatar, data),
+    authAPI(accessToken).patch(endpoints.updateAvatar, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   updateCover: (accessToken, data) =>
-    authAPI(accessToken).patch(endpoints.updateCover, data),
+    authAPI(accessToken).patch(endpoints.updateCover, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   verifyUser: (accessToken, id) =>
     authAPI(accessToken).patch(`${endpoints.userVerify}/${id}/verify_user/`),
   getUnverifiedUsers: (accessToken, q, page = 1) =>

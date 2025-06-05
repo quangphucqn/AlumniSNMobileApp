@@ -35,6 +35,7 @@ import PostDetailScreen from "./components/Post/PostDetailScreen";
 import SurveyScreen from "./components/Post/Survey";
 import UpdateSurveyScreen from "./components/Post/UpdateSurvey";
 import ChatRoomDetailScreen from "./components/Chat/ChatRoomDetail";
+import EventPostScreen from "./components/Admin/EventPost";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const HomeStackNavigator = () => {
@@ -182,6 +183,7 @@ function AppContent() {
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
       <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
+      <Stack.Screen name="EventPost" component={EventPostScreen} />
       <Stack.Screen
         name="PostDetailScreen"
         component={PostDetailScreen}

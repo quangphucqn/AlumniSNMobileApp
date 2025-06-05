@@ -252,8 +252,14 @@ export const api = {
     authAPI(accessToken).patch(
       `${endpoints.setPasswordResetTime}/${id}/set_password_reset_time/`
     ),
-  createTeacher: (accessToken, data) =>
-    authAPI(accessToken).post(endpoints.createTeacher, data),
+  createTeacher: (accessToken, data, headers) =>
+    authAPI(accessToken).post(endpoints.createTeacher, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+        ...headers,
+      },
+    }),
   getTeachersExpiredPassword: (accessToken, q, page = 1) =>
     authAPI(accessToken).get(endpoints.getTeachersExpiredPassword, {
       params: { ...(q ? { q } : {}), page },

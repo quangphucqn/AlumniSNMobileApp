@@ -122,7 +122,9 @@ const Home = () => {
         placeholder="Tìm kiếm bài viết..."
         onChangeText={search}
         value={q}
-        style={styles.searchBar}
+        style={[styles.searchBar, { backgroundColor: "#fff" }]}
+        inputStyle={{ color: "gray" }}
+        placeholderTextColor="gray"
       />
       {posts.length === 0 && !loading ? (
         <Text style={styles.noPostsText}>Không có kết quả tìm kiếm nào</Text>

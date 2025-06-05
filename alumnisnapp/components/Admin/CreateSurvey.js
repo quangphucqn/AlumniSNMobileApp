@@ -7,6 +7,7 @@ import {
   Switch,
   StyleSheet,
   Alert,
+  Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
@@ -252,6 +253,8 @@ const CreateSurvey = ({ route }) => {
           mode="contained"
           onPress={handleSubmitSurvey}
           style={{ marginTop: 50 }}
+          buttonColor="#2563eb"
+          textColor="#fff"
         >
           Hoàn tất
         </Button>
@@ -304,6 +307,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+    ...Platform.select({
+      ios: {
+        marginTop: 15,
+        marginBottom: 10,
+      },
+    }),
   },
   optionInput: {
     flex: 1,

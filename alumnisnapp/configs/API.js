@@ -4,6 +4,7 @@ import axios from "axios";
 
 const BASE_URL = "http://192.168.10.120:8000";
 
+
 // Định nghĩa các endpoints
 export const endpoints = {
   // User endpoints
@@ -25,7 +26,8 @@ export const endpoints = {
   post: "/post/",
   "post-detail": (postId) => `/post/${postId}/`,
   "my-posts": "/post/my-posts/",
-  comments: (postId) => `/post/${postId}/comment/`,
+  comment: (postId) => `/post/${postId}/comment/`,
+  comments: (postId) => `/post/${postId}/comments/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
   // Comment endpoints
@@ -128,25 +130,28 @@ export const api = {
       },
     });
   },
-  register: (userData) => axios.post(BASE_URL + endpoints.register, userData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Accept: "application/json",
-    },
-  }),
+  register: (userData) =>
+    axios.post(BASE_URL + endpoints.register, userData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   logout: (accessToken) => authAPI(accessToken).post(endpoints.logout),
-  googleLogin: (data) => axios.post(BASE_URL + endpoints.googleLogin, data,{
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Accept: "application/json",
-    },
-  }),
-  googleRegister: (data) => axios.post(BASE_URL + endpoints.googleRegister, data,{
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Accept: "application/json",
-    },
-  }),
+  googleLogin: (data) =>
+    axios.post(BASE_URL + endpoints.googleLogin, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
+  googleRegister: (data) =>
+    axios.post(BASE_URL + endpoints.googleRegister, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   getCurrentUser: (accessToken) =>
     authAPI(accessToken).get(endpoints.currentUser),
 

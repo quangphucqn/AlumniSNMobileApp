@@ -30,7 +30,6 @@ const CreatePostScreen = () => {
 
   const isPostButtonEnabled = content.trim() !== "" || images.length > 0;
 
-
   const pickImages = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -91,6 +90,8 @@ const CreatePostScreen = () => {
       });
 
       if (res.status === 201) {
+        setContent(""); // Reset content
+        setImages([]); // Reset images
         Alert.alert("Đăng bài thành công!");
         navigation.navigate("Home");
       } else {

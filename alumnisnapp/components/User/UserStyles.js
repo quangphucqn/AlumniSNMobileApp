@@ -241,12 +241,15 @@ const UserStyles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 10,
     marginHorizontal: 4,
+    height: 40,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   actionButtonText: {
     color: '#222',
     fontWeight: '600',
     fontSize: 15,
+    textAlign: 'center',
   },
   tabs: {
     flexDirection: 'row',

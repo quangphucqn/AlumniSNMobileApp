@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback } from "react";
 import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { hp } from "../Post/common";
 import { FontAwesome } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import {
   getPostComments,
   getPostReacts,
@@ -123,7 +123,11 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
   const updateCommentCount = (commentCount) => {
     setCommentCount(commentCount);
   };
-
+  useFocusEffect(
+    useCallback(() => {
+      fetchPostData();
+    }, [post.id])
+  );
   return (
     <View style={styles.container}>
       <View style={styles.userInfo}>
@@ -177,14 +181,10 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           <View style={{ flexDirection: "column", marginLeft: "auto" }}>
             <TouchableOpacity
               onPress={() =>
-                navigation.navigate("Home", {
-                  screen: "PostDetailScreen",
-                  params: {
-                    postId: post.id,
-                    onCommentAdded: updateCommentCount,
-                  },
-                })
-              }
+            navigation.navigate("PostDetailScreen", {
+                postId: post.id,
+                onCommentAdded: updateCommentCount,
+            })}
               style={{ padding: 5, marginLeft: "auto" }}
             >
               <FontAwesome
@@ -282,12 +282,9 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
 
         <TouchableOpacity
           onPress={() =>
-            navigation.navigate("Home", {
-              screen: "PostDetailScreen",
-              params: {
+            navigation.navigate("PostDetailScreen", {
                 postId: post.id,
                 onCommentAdded: updateCommentCount,
-              },
             })
           }
           style={{ marginLeft: 10 }}

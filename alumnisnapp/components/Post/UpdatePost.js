@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 import { useEffect, useState, useContext } from "react";
 import { MyUserContext } from "../../configs/Context";
 import {
@@ -17,6 +17,7 @@ import { endpoints, getSurveyData } from "../../configs/API";
 import axios from "../../configs/API";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { getValidImageUrl } from "./PostItem";
 
 const UpdatePost = ({ route }) => {
   const { post } = route.params;
@@ -51,13 +52,13 @@ const UpdatePost = ({ route }) => {
         post.images.map((img) => {
           let rawImage = img.image;
 
-          // Nếu đường dẫn bắt đầu bằng 'image/upload/', loại bỏ phần đó
-          if (rawImage.startsWith("image/upload/")) {
-            rawImage = rawImage.replace("image/upload/", "");
+          // Nếu chuỗi bắt đầu bằng "image/upload/http", cắt phần "image/upload/" ra
+          if (rawImage.startsWith("image/upload/http")) {
+            rawImage = rawImage.replace("image/upload/", ""); // chỉ cắt đúng phần đầu
           }
 
           return {
-            uri: `https://res.cloudinary.com/dizuiutpe/image/upload/${rawImage}`,
+            uri: getValidImageUrl(rawImage),
             id: img.id,
           };
         })
@@ -71,7 +72,7 @@ const UpdatePost = ({ route }) => {
           const storedToken = await SecureStore.getItemAsync("access_token");
           console.log("Token:", storedToken);
           setToken(storedToken);
-          const surveyData = await getSurveyData(post.id,storedToken);
+          const surveyData = await getSurveyData(post.id, storedToken);
           setSurveyType(surveyData.survey_type);
           setEndTime(new Date(surveyData.end_time));
           setQuestions(surveyData.questions);
@@ -150,7 +151,7 @@ const UpdatePost = ({ route }) => {
 
       if (response.status === 200) {
         Alert.alert("Đăng bài thành công!");
-        navigation.navigate("Home");
+        navigation.goBack();
       } else {
         Alert.alert("Đăng bài không thành công");
       }

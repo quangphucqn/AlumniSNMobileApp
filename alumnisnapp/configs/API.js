@@ -24,7 +24,7 @@ export const endpoints = {
   "post-detail": (postId) => `/post/${postId}/`,
   "my-posts": "/post/my-posts/",
   comment: (postId) => `/post/${postId}/comment/`,
-  comments:(postId)=>`/post/${postId}/comments/`,
+  comments: (postId) => `/post/${postId}/comments/`,
   "lock-unlock-comment": (postId) => `/post/${postId}/lock-unlock-comment/`,
 
   // Comment endpoints

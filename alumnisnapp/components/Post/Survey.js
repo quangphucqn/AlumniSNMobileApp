@@ -305,6 +305,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 8,
+    backgroundColor:"#2563eb",
   },
   completedText: {
     fontSize: 18,

@@ -181,10 +181,11 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           <View style={{ flexDirection: "column", marginLeft: "auto" }}>
             <TouchableOpacity
               onPress={() =>
-            navigation.navigate("PostDetailScreen", {
-                postId: post.id,
-                onCommentAdded: updateCommentCount,
-            })}
+                navigation.navigate("PostDetailScreen", {
+                  postId: post.id,
+                  onCommentAdded: updateCommentCount,
+                })
+              }
               style={{ padding: 5, marginLeft: "auto" }}
             >
               <FontAwesome
@@ -244,6 +245,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           <Text style={styles.reactionCountText}>{loveCount}</Text>
         </View>
       </View>
+      <View style={styles.divider} />
       <View style={styles.interactions}>
         <TouchableOpacity onPress={() => setShowReactions(!showReactions)}>
           <FontAwesome
@@ -283,8 +285,8 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("PostDetailScreen", {
-                postId: post.id,
-                onCommentAdded: updateCommentCount,
+              postId: post.id,
+              onCommentAdded: updateCommentCount,
             })
           }
           style={{ marginLeft: 10 }}
@@ -304,6 +306,11 @@ const styles = StyleSheet.create({
     marginRight: 15,
     fontSize: 14,
     color: "#555",
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#ccc", // hoặc "#ddd" cho sáng hơn
+    marginVertical: 8,
   },
   imagesContainer: {
     flexDirection: "row",

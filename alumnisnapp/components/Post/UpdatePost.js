@@ -152,7 +152,7 @@ const UpdatePost = ({ route }) => {
 
       if (response.status === 200) {
         Alert.alert("Đăng bài thành công!");
-        navigation.navigate("Home");
+        navigation.goBack();
       } else {
         Alert.alert("Đăng bài không thành công");
       }

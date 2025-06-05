@@ -208,7 +208,7 @@ const UpdateSurvey  = ({ route }) => {
             onPress={handleAddQuestion}
             style={styles.addButton}
         />
-        <Button mode="contained" style={{ marginTop: 50 }} onPress={handleSubmitSurvey}>Hoàn tất</Button>
+        <Button mode="contained" style={{ marginTop: 50,backgroundColor:"#2563eb" }} onPress={handleSubmitSurvey}>Hoàn tất</Button>
     </ScrollView>
   );
 

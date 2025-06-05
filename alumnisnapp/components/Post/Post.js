@@ -10,6 +10,7 @@ import {
   Alert,
   SafeAreaView,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -42,8 +43,6 @@ const CreatePostScreen = () => {
       allowsMultipleSelection: true,
       quality: 1,
     });
-
-    console.log("ImagePicker result:", result);
 
     if (!result.canceled) {
       setImages(result.assets);
@@ -90,8 +89,8 @@ const CreatePostScreen = () => {
       });
 
       if (res.status === 201) {
-        setContent(""); // Reset content
-        setImages([]); // Reset images
+        setContent("");
+        setImages([]);
         Alert.alert("Đăng bài thành công!");
         navigation.navigate("Home");
       } else {
@@ -177,6 +176,13 @@ const CreatePostScreen = () => {
             ))}
           </ScrollView>
         </ScrollView>
+
+        {/* Loading Overlay */}
+        {loading && (
+          <View style={styles.loadingOverlay}>
+            <ActivityIndicator size="large" color="#007BFF" />
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -261,5 +267,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 5,
     right: 5,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
 });

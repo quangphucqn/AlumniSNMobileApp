@@ -9,6 +9,8 @@ export const endpoints = {
   // User endpoints
   login: "/o/token/",
   register: "/register/",
+  googleRegister: "/google-register/",
+  googleLogin: "/auth/convert-token/",
   user: "/user/",
   currentUser: "/user/current_user/",
   changePassword: "/user/change_password/",
@@ -43,8 +45,8 @@ export const endpoints = {
   groups: "/groups/",
 
   // Event endpoints
-  events: "/events/",
-  eventDetail: "/events/{id}/",
+  events: "/event_invite/",
+  eventDetail: (id) => `/event_invite/${id}/`,
 
   // Chat endpoints
   chats: "/chat/",
@@ -86,9 +88,9 @@ export const getListUsers = async (
   }
 };
 
-export const getPostComments = async (postId, accessToken) => {
+export const getPostComments = async (postId, token) => {
   try {
-    const res = await authAPI(accessToken).get(endpoints.comments(postId));
+    const res = await authAPI(token).get(endpoints.comments(postId));
     return res.data;
   } catch (error) {
     console.error("Error fetching comments:", error);
@@ -127,8 +129,28 @@ export const api = {
       },
     });
   },
-  register: (userData) => axios.post(endpoints.register, userData),
+  register: (userData) =>
+    axios.post(BASE_URL + endpoints.register, userData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   logout: (accessToken) => authAPI(accessToken).post(endpoints.logout),
+  googleLogin: (data) =>
+    axios.post(BASE_URL + endpoints.googleLogin, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
+  googleRegister: (data) =>
+    axios.post(BASE_URL + endpoints.googleRegister, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   getCurrentUser: (accessToken) =>
     authAPI(accessToken).get(endpoints.currentUser),
 
@@ -159,7 +181,12 @@ export const api = {
   // Event APIs
   getEvents: (accessToken) => authAPI(accessToken).get(endpoints.events),
   createEvent: (accessToken, data) =>
-    authAPI(accessToken).post(endpoints.events, data),
+    authAPI(accessToken).post(endpoints.events, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   updateEvent: (accessToken, id, data) =>
     authAPI(accessToken).patch(`${endpoints.events}/${id}/`, data),
   deleteEvent: (accessToken, id) =>
@@ -202,9 +229,19 @@ export const api = {
   changePassword: (accessToken, data) =>
     authAPI(accessToken).patch(endpoints.changePassword, data),
   updateAvatar: (accessToken, data) =>
-    authAPI(accessToken).patch(endpoints.updateAvatar, data),
+    authAPI(accessToken).patch(endpoints.updateAvatar, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   updateCover: (accessToken, data) =>
-    authAPI(accessToken).patch(endpoints.updateCover, data),
+    authAPI(accessToken).patch(endpoints.updateCover, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+      },
+    }),
   verifyUser: (accessToken, id) =>
     authAPI(accessToken).patch(`${endpoints.userVerify}/${id}/verify_user/`),
   getUnverifiedUsers: (accessToken, q, page = 1) =>

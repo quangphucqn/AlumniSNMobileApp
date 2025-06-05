@@ -161,7 +161,7 @@ const UserListModal = ({ visible, onClose, onSelectUser, currentUserId }) => {
             )}
           />
         </View>
-      </View>
+    </View>
     </Modal>
   );
 };

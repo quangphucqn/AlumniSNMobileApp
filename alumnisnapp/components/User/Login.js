@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Modal } from 'react-native';
+import React, { useState, useContext, useEffect } from 'react';
+import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, Alert, Modal, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { api } from '../../configs/API';
@@ -7,9 +7,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as SecureStore from 'expo-secure-store';
 import { MyUserContext } from '../../configs/Context';
 import UserStyles from './UserStyles';
-import { CLIENT_ID, CLIENT_SECRET } from '@env';
+import { CLIENT_ID, CLIENT_SECRET, GOOGLE_CLIENT_ID,IOS_CLIENT_ID,ANDROID_CLIENT_ID } from '@env';
 import { authenticateWithBiometrics } from '../../configs/Utils';
-
+import * as Google from 'expo-auth-session/providers/google';
+import * as WebBrowser from 'expo-web-browser';
 
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -22,9 +23,126 @@ export default function Login({ navigation, route }) {
   const [showExpiredPasswordModal, setShowExpiredPasswordModal] = useState(false);
   const [expiredPasswordMessage, setExpiredPasswordMessage] = useState('');
   const [pendingLoginUser, setPendingLoginUser] = useState(null);
+  const [showMssvModal, setShowMssvModal] = useState(false);
+  const [mssv, setMssv] = useState('');
+  const [pendingIdToken, setPendingIdToken] = useState(null);
+  const [registerLoading, setRegisterLoading] = useState(false);
 
   // Lấy hàm dispatch từ context để cập nhật trạng thái user toàn app
   const { dispatch } = useContext(MyUserContext);
+
+  WebBrowser.maybeCompleteAuthSession();
+
+  // Cấu hình Google OAuth
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    iosClientId: IOS_CLIENT_ID,
+    webClientId: GOOGLE_CLIENT_ID,
+    androidClientId: ANDROID_CLIENT_ID,
+    scopes: ['openid', 'profile', 'email'],
+  });
+
+  useEffect(() => {
+    if (response?.type === 'success') {
+      const { authentication } = response;
+      console.log('Google login success', authentication.accessToken);
+      handleGoogleLogin(authentication.accessToken, authentication.idToken);
+    }
+  }, [response]);
+
+  // Hàm xử lý đăng nhập thành công chung cho cả Google và truyền thống
+  const handleLoginSuccessWithToken = async (accessToken, refreshToken = null, lastLoginUsername = null) => {
+    // Lưu access_token, refresh_token vào SecureStore
+    await SecureStore.setItemAsync('access_token', accessToken);
+    if (refreshToken) {
+      await SecureStore.setItemAsync('refresh_token', refreshToken);
+    }
+    if (username) {
+      await SecureStore.setItemAsync('lastLoginUsername', username);
+    }
+    // Lấy user hiện tại
+    const userResponse = await api.getCurrentUser(accessToken);
+    const user = userResponse.data;
+    // Xử lý logic giống cũ
+    if (user.role === 2 && user.must_change_password) {
+      if (user.password_reset_time) {
+        const resetTime = new Date(user.password_reset_time);
+        const now = new Date();
+        if (now < resetTime) {
+          handlePasswordChangeModal(resetTime, false, user);
+          return;
+        } else {
+          handlePasswordChangeModal(resetTime, true);
+          return;
+        }
+      }
+    }
+    if (user.role === 1 && !user.is_verified) {
+      await handleUnverifiedUser();
+      return;
+    }
+    dispatch({ type: 'login', payload: user });
+    if (user.role === 0) {
+      await AsyncStorage.setItem('showAdminTab', 'true');
+      navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
+    } else if (user.role === 1 || user.role === 2) {
+      await AsyncStorage.removeItem('showAdminTab');
+      navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
+    } else {
+      Alert.alert('Lỗi', 'Tài khoản không hợp lệ!');
+      await Promise.all([
+        SecureStore.deleteItemAsync('access_token'),
+        SecureStore.deleteItemAsync('refresh_token'),
+        SecureStore.deleteItemAsync('user')
+      ]);
+      dispatch({ type: 'logout' });
+    }
+  };
+
+  const handleGoogleLogin = async (accessToken, idToken) => {
+    try {
+      const formData = new FormData();
+      formData.append('grant_type', 'convert_token');
+      formData.append('client_id', CLIENT_ID);
+      formData.append('client_secret', CLIENT_SECRET);
+      formData.append('backend', 'google-oauth2');
+      formData.append('token', accessToken);
+
+      const response = await api.googleLogin(formData);
+      await handleLoginSuccessWithToken(response.data.access_token, response.data.refresh_token);
+    } catch (error) {
+      // Nếu lỗi access_denied thì show modal nhập MSSV
+      if (error.response?.data?.error === 'access_denied') {
+        setPendingIdToken(idToken);
+        setShowMssvModal(true);
+      } else {
+        Alert.alert('Lỗi', 'Đăng nhập bằng Google thất bại!');
+      }
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    if (!mssv.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập MSSV!');
+      return;
+    }
+    try {
+      setRegisterLoading(true);
+      const formData = new FormData();
+      formData.append('token', pendingIdToken);
+      formData.append('mssv', mssv.trim());
+      const response = await api.googleRegister(formData);
+      Alert.alert('Thông báo', response?.data?.message || 'Đăng ký thành công', 'Vui lòng đăng nhập Google lại để hoàn tất.');
+      setShowMssvModal(false);
+      setMssv('');
+    } catch (error) {
+      let message = 'Đăng ký tài khoản bằng Google thất bại!';
+      if (error.response?.data?.detail) message = error.response.data.detail;
+      else if (error.response?.data?.message) message = error.response.data.message;
+      Alert.alert('Lỗi', message);
+    } finally {
+      setRegisterLoading(false);
+    }
+  };
 
   const handleUnverifiedUser = async () => {
     setShowVerifyModal(true);
@@ -39,41 +157,6 @@ export default function Login({ navigation, route }) {
     } else {
       setShowChangePasswordModal(true);
       if (user) setPendingLoginUser(user);
-    }
-  };
-
-  const handleLoginSuccess = async (user) => {
-    if (user.role === 2 && user.must_change_password) {
-      if (user.password_reset_time) {
-        const resetTime = new Date(user.password_reset_time);
-        const now = new Date();
-        if (now < resetTime) {
-          handlePasswordChangeModal(resetTime, false, user);
-          return;
-        } else {
-          handlePasswordChangeModal(resetTime, true);
-          return;
-        }
-      }
-    }
-    dispatch({ type: 'login', payload: user });
-    if (user.role === 0) {
-      await AsyncStorage.setItem('showAdminTab', 'true');
-      navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
-    } else if (user.role === 1) {
-      await AsyncStorage.removeItem('showAdminTab');
-      navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
-    } else if (user.role === 2) {
-      await AsyncStorage.removeItem('showAdminTab');
-      navigation.reset({ index: 0, routes: [{ name: 'MainApp' }] });
-    } else {
-      Alert.alert('Lỗi', 'Tài khoản không hợp lệ!');
-      await Promise.all([
-        SecureStore.deleteItemAsync('access_token'),
-        SecureStore.deleteItemAsync('refresh_token'),
-        SecureStore.deleteItemAsync('user')
-      ]);
-      dispatch({ type: 'logout' });
     }
   };
 
@@ -92,17 +175,7 @@ export default function Login({ navigation, route }) {
       formData.append('client_secret', CLIENT_SECRET);
       const response = await api.login(formData);
       if (response.data.access_token) {
-        // Lưu username của lần đăng nhập cuối cùng
-        await SecureStore.setItemAsync('lastLoginUsername', username);
-        await SecureStore.setItemAsync('access_token', response.data.access_token);
-        await SecureStore.setItemAsync('refresh_token', response.data.refresh_token);
-        const userResponse = await api.getCurrentUser(response.data.access_token);
-        const user = userResponse.data;
-        if (user.role === 1 && !user.is_verified) {
-          await handleUnverifiedUser();
-          return;
-        }
-        await handleLoginSuccess(user);
+        await handleLoginSuccessWithToken(response.data.access_token, response.data.refresh_token, username);
       } else {
         throw new Error('Không nhận được access token từ server');
       }
@@ -160,11 +233,7 @@ export default function Login({ navigation, route }) {
       const response = await api.login(formData);
       console.log('API response:', response.data);
       if (response.data.access_token) {
-        await SecureStore.setItemAsync('access_token', response.data.access_token);
-        await SecureStore.setItemAsync('refresh_token', response.data.refresh_token);
-        const userResponse = await api.getCurrentUser(response.data.access_token);
-        const user = userResponse.data;
-        await handleLoginSuccess(user);
+        await handleLoginSuccessWithToken(response.data.access_token, response.data.refresh_token);
       } else {
         throw new Error('Không nhận được access token từ server');
       }
@@ -222,7 +291,11 @@ export default function Login({ navigation, route }) {
           <View style={UserStyles.line} />
         </View>
         <View style={UserStyles.socialContainer}>
-          <TouchableOpacity style={UserStyles.socialButton}>
+          <TouchableOpacity
+            style={UserStyles.socialButton}
+            onPress={() => promptAsync()}
+            disabled={!request}
+          >
             <AntDesign name="google" size={24} color="#EA4335" />
           </TouchableOpacity>
         </View>
@@ -342,6 +415,52 @@ export default function Login({ navigation, route }) {
             >
               <Text style={UserStyles.modalButtonText}>Đóng</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      {/* Modal nhập MSSV */}
+      <Modal
+        visible={showMssvModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setShowMssvModal(false);
+          setMssv('');
+        }}
+      >
+        <View style={UserStyles.modalOverlay}>
+          <View style={UserStyles.modalContainer}>
+            <Text style={UserStyles.modalTitle}>Đăng ký tài khoản Google</Text>
+            <Text style={UserStyles.modalMessage}>Vui lòng nhập MSSV để hoàn tất đăng ký:</Text>
+            <View style={UserStyles.inputContainer}>
+              <TextInput
+                style={UserStyles.input}
+                placeholder="Nhập MSSV"
+                value={mssv}
+                onChangeText={setMssv}
+                autoCapitalize="none"
+                editable={!registerLoading}
+              />
+            </View>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 }}>
+              <TouchableOpacity
+                style={[UserStyles.modalButton, { flex: 1, marginRight: 8, backgroundColor: '#2563eb' }]}
+                onPress={handleGoogleRegister}
+                disabled={registerLoading}
+              >
+                <Text style={UserStyles.modalButtonMSSVText}>{registerLoading ? 'Đang đăng ký...' : 'Xác nhận'}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[UserStyles.modalButton, { flex: 1, marginLeft: 8, backgroundColor: '#aaa' }]}
+                onPress={() => {
+                  setShowMssvModal(false);
+                  setMssv('');
+                }}
+                disabled={registerLoading}
+              >
+                <Text style={UserStyles.modalButtonMSSVText}>Huỷ</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

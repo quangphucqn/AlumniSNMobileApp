@@ -6,6 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 import { api, getListUsers } from '../../configs/API';
 import groupStyles from './GroupStyles';
 import { useNavigation } from '@react-navigation/native';
+import { EncodingType } from 'expo-file-system';
 
 export default function CreateGroup() {
   const navigation = useNavigation();
@@ -100,7 +101,7 @@ export default function CreateGroup() {
     const selected = selectedUserIds.includes(item.id);
     return (
       <TouchableOpacity
-        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8, backgroundColor: selected ? '#e0e7ff' : '#fff', borderRadius: 8, marginBottom: 4 }}
+        style={{ flexDirection: 'row', alignItems: 'center', paddingVertical: 8, paddingHorizontal: 8, backgroundColor: selected ? '#e0e7ff' : '#fff', borderRadius: 8, marginBottom: 4 ,height: 80}}
         onPress={() => toggleSelectUser(item.id)}
         activeOpacity={0.7}
       >
@@ -115,7 +116,7 @@ export default function CreateGroup() {
   };
 
   return (
-    <SafeAreaView style={[groupStyles.container, { flex: 1 }]}> 
+    <SafeAreaView style={[groupStyles.container, { flex: 1 }]} edges={['right', 'left']}> 
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: insets.top + 8, paddingLeft: 0, marginBottom: 8 }}>
         <TouchableOpacity style={[groupStyles.backBtn, { position: 'relative', top: 0, left: 0, marginTop: 0 ,marginLeft: 10}]} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />

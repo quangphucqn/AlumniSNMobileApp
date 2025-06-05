@@ -285,7 +285,6 @@ function ProfileContent() {
               </View>
             </View>
 
-            {/* Thông tin cá nhân */}
             <View style={UserStyles.infoRow}>
               <Text style={UserStyles.profileName}>
                 {user.last_name} {user.first_name}
@@ -293,7 +292,6 @@ function ProfileContent() {
               <Text style={UserStyles.profileEmail}>{user.email}</Text>
             </View>
 
-            {/* Hành động */}
             <View style={UserStyles.buttonRow}>
               <TouchableOpacity
                 style={UserStyles.actionButton}
@@ -359,7 +357,6 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  
 });
 // Wrap Profile with Drawer Navigator
 export default function Profile() {

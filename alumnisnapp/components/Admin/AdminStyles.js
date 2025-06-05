@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.06,
     shadowRadius: 6,
     elevation: 2,
-    minHeight: 80,
+    minHeight: 95,
   },
   avatar: {
     width: 48,

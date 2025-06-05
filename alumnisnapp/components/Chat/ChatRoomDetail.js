@@ -8,6 +8,7 @@ import { getFirestore, collection, query, orderBy, onSnapshot, limit, startAfter
 import { app } from '../../configs/firebaseConfig';
 import { MyUserContext } from '../../configs/Context';
 import ChatRoomStyles from './ChatRoomStyles';
+import { Ionicons } from '@expo/vector-icons';
 
 const db = getFirestore(app);
 
@@ -325,7 +326,7 @@ export default function ChatRoomDetail() {
         {/* Header */}
         <View style={ChatRoomStyles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()} style={{ marginRight: 12 }}>
-            <Text style={{ fontSize: 22 }}>←</Text>
+            <Ionicons name="chevron-back" size={24} color="black" />
           </TouchableOpacity>
           <Image source={{ uri: roomInfo?.other_user?.avatar || 'https://via.placeholder.com/40' }} style={ChatRoomStyles.avatar} />
           <Text style={ChatRoomStyles.userName}>{roomInfo?.other_user?.last_name} {roomInfo?.other_user?.first_name}</Text>

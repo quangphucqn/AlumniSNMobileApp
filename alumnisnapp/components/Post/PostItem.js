@@ -21,15 +21,20 @@ moment.locale("vi");
 export const getValidImageUrl = (url) => {
   if (!url) return "";
 
-  // Nếu là URL đầy đủ nhưng bị lồng "image/upload/..." ở đầu => xóa phần lặp
-  if (url.startsWith("image/upload/https://")) {
-    return url.replace(/^image\/upload\//, "");
-  }
-
   // Nếu là URL đầy đủ, dùng luôn
   if (url.startsWith("http")) return url;
 
-  // Nếu là đường dẫn tương đối => thêm domain Cloudinary
+  // Nếu là 'image/upload/https://...' => cắt 'image/upload/' ở đầu
+  if (url.startsWith("image/upload/http")) {
+    return url.replace(/^image\/upload\//, "");
+  }
+
+  // Nếu là đường dẫn đã có 'image/upload/' ở đầu, chỉ nối domain
+  if (url.startsWith("image/upload/")) {
+    return `https://res.cloudinary.com/dizuiutpe/${url}`;
+  }
+
+  // Nếu là đường dẫn tương đối khác, thêm 'image/upload/' vào
   return `https://res.cloudinary.com/dizuiutpe/image/upload/${url}`;
 };
 
@@ -130,7 +135,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
         <View>
           {post.user.first_name || post.user.last_name ? (
             <Text style={styles.username}>
-              {post.user.first_name} {post.user.last_name}
+              {post.user.last_name} {post.user.first_name}
             </Text>
           ) : (
             <Text style={styles.username}>Quản Trị Viên</Text>

@@ -99,6 +99,7 @@ export default function AddUser() {
           backgroundColor: alreadyInGroup ? '#f3f4f6' : (selected ? '#e0e7ff' : '#fff'),
           borderRadius: 8,
           marginBottom: 4,
+          height: 95,
           opacity: alreadyInGroup ? 0.5 : 1
         }}
         onPress={() => !alreadyInGroup && toggleSelectUser(item.id)}
@@ -120,7 +121,7 @@ export default function AddUser() {
   };
 
   return (
-    <SafeAreaView style={[groupStyles.container, { flex: 1 }]}> 
+    <SafeAreaView style={[groupStyles.container, { flex: 1 }]} edges={['right', 'left']}> 
       <View style={{ flexDirection: 'row', alignItems: 'center', paddingTop: insets.top + 8, paddingLeft: 0, marginBottom: 8 }}>
         <TouchableOpacity style={[groupStyles.backBtn, { position: 'relative', top: 0, left: 0, marginTop: 0 }]} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />

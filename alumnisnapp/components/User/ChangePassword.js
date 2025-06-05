@@ -46,7 +46,7 @@ export default function ChangePasswordScreen({ navigation }) {
   };
 
   return (
-    <SafeAreaView style={UserStyles.container}>
+    <SafeAreaView style={UserStyles.container} edges={['left', 'right']}>
       <View style={{ paddingTop: insets.top + 8, paddingHorizontal: 0 }}>
         <TouchableOpacity style={[UserStyles.backButton, { position: 'relative', top: 0, left: 0, marginBottom: 8 }]} onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back" size={28} color="#222" />

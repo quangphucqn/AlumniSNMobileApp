@@ -95,7 +95,7 @@ export default function ManageUser() {
     <Swipeable
       renderRightActions={(progress, dragX) => renderRightActions(progress, dragX, () => handleDeleteUser(item))}
     >
-      <View style={{ flexDirection: 'row', alignItems: 'center', height: 70, paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#fff', borderRadius: 10, marginBottom: 2, elevation: 1 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'center', height: 70, paddingVertical: 10, paddingHorizontal: 10, backgroundColor: '#fff', borderRadius: 10, marginBottom: 2, elevation: 1,height: 90 }}>
         <Image source={{ uri: item.avatar || 'https://via.placeholder.com/100' }} style={{ width: 40, height: 40, borderRadius: 20, marginRight: 12, backgroundColor: '#eee' }} />
         <View style={{ flex: 1 }}>
           <Text style={{ fontWeight: 'bold', color: '#222' }}>{item.last_name} {item.first_name}</Text>

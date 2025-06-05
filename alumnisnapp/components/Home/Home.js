@@ -10,8 +10,8 @@ import {
 import API, { authAPI, endpoints } from "../../configs/API";
 import { ActivityIndicator, Searchbar } from "react-native-paper";
 import { PostItem } from "../Post/PostItem";
-import * as SecureStore from 'expo-secure-store';
-import { useNavigation } from "@react-navigation/native";
+import * as SecureStore from "expo-secure-store";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 
 const Home = () => {
   const [posts, setPosts] = useState([]);
@@ -33,7 +33,6 @@ const Home = () => {
     };
     fetchToken();
   }, []);
-
   const loadPosts = async () => {
     if (page > 0 && token) {
       setLoading(true);
@@ -110,15 +109,21 @@ const Home = () => {
       origin: "HomeScreen",
     });
   };
+  useFocusEffect(
+    useCallback(() => {
+      setPage(1);
+      loadPosts();
+    }, [token])
+  );
 
   return (
     <View>
       <Searchbar
-  placeholder="Tìm kiếm bài viết..."
-  onChangeText={search}
-  value={q}
-  style={styles.searchBar}
-/>
+        placeholder="Tìm kiếm bài viết..."
+        onChangeText={search}
+        value={q}
+        style={styles.searchBar}
+      />
       {posts.length === 0 && !loading ? (
         <Text style={styles.noPostsText}>Không có kết quả tìm kiếm nào</Text>
       ) : (
@@ -131,6 +136,7 @@ const Home = () => {
             renderItem={({ item }) => (
               <PostItem
                 post={item}
+                fromScreen="Home"
                 onPostDeleted={handlePostDeletion}
                 onPostUpdated={handlePostUpdation}
               />

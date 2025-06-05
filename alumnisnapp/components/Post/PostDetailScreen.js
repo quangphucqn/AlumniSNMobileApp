@@ -460,6 +460,7 @@ const PostDetailScreen = ({ route }) => {
   }
 
   return (
+    
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -739,4 +740,4 @@ export const styles = StyleSheet.create({
   },
 });
 
-export default PostDetailScreen;  
+export default PostDetailScreen;

@@ -168,6 +168,7 @@ const UpdatePost = ({ route }) => {
   };
 
   return (
+    
     <View style={styles.container}>
       <View style={styles.header}>
         <Image

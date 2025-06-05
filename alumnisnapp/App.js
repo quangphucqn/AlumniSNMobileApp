@@ -1,5 +1,5 @@
-import 'react-native-reanimated';
-import 'react-native-gesture-handler';
+import "react-native-reanimated";
+import "react-native-gesture-handler";
 import React, { useContext } from "react";
 import { StatusBar } from "expo-status-bar";
 import { NavigationContainer, useNavigation } from "@react-navigation/native";
@@ -53,63 +53,23 @@ const HomeStackNavigator = () => {
               <IconButton
                 icon="newspaper-variant-multiple-outline"
                 size={24}
-                onPress={() =>
-                  navigation.navigate("Home", { screen: "Profile" })
-                }
+                onPress={() => navigation.navigate("Profile")}
                 color="black"
               />
               <IconButton
                 icon="pencil-plus"
                 size={24}
-                onPress={() =>
-                  navigation.navigate("Home", {
-                    screen: "CreatePostScreen",
-                  })
-                }
+                onPress={() => navigation.navigate("CreatePostScreen")}
                 color="black"
               />
             </View>
           ),
         }}
       />
-      <Stack.Screen
-        name="PostDetailScreen"
-        component={PostDetailScreen}
-        options={{ title: "Bài viết" }}
-      />
-      <Stack.Screen
-        name="CreatePostScreen"
-        component={CreatePostScreen}
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="SurveyScreen"
-        component={SurveyScreen}
-        options={{ title: "Khảo sát" }}
-      />
-      <Stack.Screen
-        name="CreateSurveyScreen"
-        component={CreateSurveyScreen}
-        options={{ title: "Tạo khảo sát" }}
-      />
-      <Stack.Screen
-        name="UpdatePostScreen"
-        component={UpdatePostScreen}
-        options={{ title: "Chỉnh sửa bài viết" }}
-      />
-      <Stack.Screen
-        name="UpdateSurveyScreen"
-        component={UpdateSurveyScreen}
-        options={{ title: "Chỉnh sửa khảo sát" }}
-      />
-      <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={{ title: "Dòng thời gian" }}
-      />
     </Stack.Navigator>
   );
 };
+
 const ProfileStack = createNativeStackNavigator();
 
 function ProfileStackNavigator() {
@@ -119,11 +79,6 @@ function ProfileStackNavigator() {
         name="ProfileScreen"
         component={ProfileScreen}
         options={{ headerShown: false }}
-      />
-      <ProfileStack.Screen
-        name="SurveyScreen"
-        component={SurveyScreen}
-        options={{ title: "Khảo sát" }}
       />
     </ProfileStack.Navigator>
   );
@@ -227,6 +182,36 @@ function AppContent() {
       <Stack.Screen name="AddUser" component={AddUserScreen} />
       <Stack.Screen name="ManageUsers" component={ManageUsersScreen} />
       <Stack.Screen name="ChatRoomDetail" component={ChatRoomDetailScreen} />
+      <Stack.Screen
+        name="PostDetailScreen"
+        component={PostDetailScreen}
+        options={{
+          title: "Bài viết",
+          headerTitleAlign: "center",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />
+      <Stack.Screen
+        name="UpdatePostScreen"
+        component={UpdatePostScreen}
+        options={{
+          title: "Chỉnh sửa bài viết",
+          headerTitleAlign: "center",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen name="SurveyScreen" component={SurveyScreen} options={{
+          title: "Bài khảo sát",
+          headerTitleAlign: "center",
+          headerShown: true,
+        }}/>
+      <Stack.Screen name="CreateSurveyScreen" component={CreateSurveyScreen} />
+      <Stack.Screen name="UpdateSurveyScreen" component={UpdateSurveyScreen} options={{
+          title: "Chỉnh sửa bài khảo sát",
+          headerTitleAlign: "center",
+          headerShown: true,
+        }}/>
     </Stack.Navigator>
   );
 }

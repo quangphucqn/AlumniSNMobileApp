@@ -2,7 +2,7 @@
 
 import axios from "axios";
 
-const BASE_URL = "http://192.168.1.9:8000";
+const BASE_URL = "http://192.168.10.120:8000";
 
 // Định nghĩa các endpoints
 export const endpoints = {
@@ -248,8 +248,14 @@ export const api = {
     authAPI(accessToken).patch(
       `${endpoints.setPasswordResetTime}/${id}/set_password_reset_time/`
     ),
-  createTeacher: (accessToken, data) =>
-    authAPI(accessToken).post(endpoints.createTeacher, data),
+  createTeacher: (accessToken, data, headers) =>
+    authAPI(accessToken).post(endpoints.createTeacher, data, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+        Accept: "application/json",
+        ...headers,
+      },
+    }),
   getTeachersExpiredPassword: (accessToken, q, page = 1) =>
     authAPI(accessToken).get(endpoints.getTeachersExpiredPassword, {
       params: { ...(q ? { q } : {}), page },

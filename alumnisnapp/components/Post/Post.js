@@ -141,7 +141,7 @@ const CreatePostScreen = () => {
             <Text style={styles.username}>
               {user.role === 0
                 ? "Quản Trị Viên"
-                : `${user.first_name} ${user.last_name}`}
+                : `${user.last_name} ${user.first_name}`}
             </Text>
           </View>
 

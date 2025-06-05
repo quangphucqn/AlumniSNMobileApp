@@ -7,6 +7,7 @@ import {
   Switch,
   StyleSheet,
   Alert,
+  Platform,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
@@ -304,6 +305,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
+    ...Platform.select({
+      ios: {
+        marginTop: 15,
+        marginBottom: 10,
+      },
+    }),
   },
   optionInput: {
     flex: 1,

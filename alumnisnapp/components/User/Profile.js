@@ -247,90 +247,92 @@ function ProfileContent() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
-      <ScrollView
+      <FlatList
+        data={posts}
+        showsVerticalScrollIndicator={false}
+        keyExtractor={(item, index) => item?.id?.toString() || index.toString()}
+        contentContainerStyle={styles.listStyle}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={{ paddingBottom: 80 }}
-      >
-        {/* Cover + Avatar */}
-        <View style={UserStyles.coverContainer}>
-          {user.cover ? (
-            <Image source={{ uri: user.cover }} style={UserStyles.coverImage} />
-          ) : (
-            <View style={UserStyles.coverPlaceholder} />
-          )}
-          <View style={UserStyles.avatarWrapper}>
-            <Image
-              source={{ uri: user.avatar || "https://via.placeholder.com/150" }}
-              style={UserStyles.avatarImage}
-            />
-          </View>
-          <View style={UserStyles.headerAbsolute}>
-            <TouchableOpacity onPress={() => navigation.openDrawer()}>
-              <Feather name="menu" size={24} color="#222" />
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        {/* Thông tin cá nhân */}
-        <View style={UserStyles.infoRow}>
-          <Text style={UserStyles.profileName}>
-            {user.last_name} {user.first_name}
-          </Text>
-          <Text style={UserStyles.profileEmail}>{user.email}</Text>
-        </View>
-
-        {/* Hành động */}
-        <View style={UserStyles.buttonRow}>
-          <TouchableOpacity
-            style={UserStyles.actionButton}
-            onPress={() => navigation.navigate("EditProfile")}
-          >
-            <Text style={UserStyles.actionButtonText}>
-              Chỉnh sửa trang cá nhân
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={UserStyles.actionButton}>
-            <Text style={UserStyles.actionButtonText}>
-              Chia sẻ trang cá nhân
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Hiển thị tất cả bài viết luôn */}
-        <View style={{ flex: 1, minHeight: 400, marginTop: 10 }}>
-          <FlatList
-            data={posts}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listStyle}
-            keyExtractor={(item, index) =>
-              item?.id?.toString() || index.toString()
-            }
-            renderItem={({ item }) =>
-              item ? (
-                <View style={styles.postWrapper}>
-                  <PostItem
-                    fromSceen="Profile"
-                    post={item}
-                    onPostDeleted={handlePostDeletion}
-                    onPostUpdated={handlePostUpdation}
-                  />
-                </View>
-              ) : null
-            }
-            refreshControl={
-              <RefreshControl refreshing={loading} onRefresh={loadPosts} />
-            }
-            ListEmptyComponent={
-              !loading && (
-                <Text style={styles.noPostsText}>Bạn chưa có bài viết nào</Text>
-              )
-            }
-            ListFooterComponent={loading && <ActivityIndicator />}
+          <RefreshControl
+            refreshing={refreshing || loading}
+            onRefresh={onRefresh}
           />
-        </View>
-      </ScrollView>
+        }
+        ListHeaderComponent={
+          <>
+            {/* Cover + Avatar */}
+            <View style={UserStyles.coverContainer}>
+              {user.cover ? (
+                <Image
+                  source={{ uri: user.cover }}
+                  style={UserStyles.coverImage}
+                />
+              ) : (
+                <View style={UserStyles.coverPlaceholder} />
+              )}
+              <View style={UserStyles.avatarWrapper}>
+                <Image
+                  source={{
+                    uri: user.avatar || "https://via.placeholder.com/150",
+                  }}
+                  style={UserStyles.avatarImage}
+                />
+              </View>
+              <View style={UserStyles.headerAbsolute}>
+                <TouchableOpacity onPress={() => navigation.openDrawer()}>
+                  <Feather name="menu" size={24} color="#222" />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Thông tin cá nhân */}
+            <View style={UserStyles.infoRow}>
+              <Text style={UserStyles.profileName}>
+                {user.last_name} {user.first_name}
+              </Text>
+              <Text style={UserStyles.profileEmail}>{user.email}</Text>
+            </View>
+
+            {/* Hành động */}
+            <View style={UserStyles.buttonRow}>
+              <TouchableOpacity
+                style={UserStyles.actionButton}
+                onPress={() => navigation.navigate("EditProfile")}
+              >
+                <Text style={UserStyles.actionButtonText}>
+                  Chỉnh sửa trang cá nhân
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={UserStyles.actionButton}>
+                <Text style={UserStyles.actionButtonText}>
+                  Chia sẻ trang cá nhân
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* Tiêu đề hoặc khoảng cách trước danh sách bài viết */}
+            <View style={{ marginTop: 10 }} />
+          </>
+        }
+        renderItem={({ item }) =>
+          item ? (
+            <View style={styles.postWrapper}>
+              <PostItem
+                fromSceen="Profile"
+                post={item}
+                onPostDeleted={handlePostDeletion}
+                onPostUpdated={handlePostUpdation}
+              />
+            </View>
+          ) : null
+        }
+        ListEmptyComponent={
+          !loading && (
+            <Text style={styles.noPostsText}>Bạn chưa có bài viết nào</Text>
+          )
+        }
+        ListFooterComponent={loading && <ActivityIndicator />}
+      />
     </SafeAreaView>
   );
 }
@@ -357,6 +359,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  
 });
 // Wrap Profile with Drawer Navigator
 export default function Profile() {

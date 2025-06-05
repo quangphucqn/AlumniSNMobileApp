@@ -15,6 +15,7 @@ import { IconButton, Button, Appbar } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
 import * as SecureStore from "expo-secure-store";
 import { authAPI, endpoints } from "../../configs/API";
+import { Ionicons } from "@expo/vector-icons";
 
 const surveyTypes = [
   { label: "Training Program", value: 1 },
@@ -142,8 +143,9 @@ const CreateSurvey = ({ route }) => {
 
   return (
     <>
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
+      <Appbar.Header style={{ backgroundColor: "#fff" }}>
+        <Ionicons name="chevron-back" style={{ marginLeft: 10 }} size={24} color="black" onPress={() => navigation.goBack()}/>
+        {/* <Appbar.BackAction onPress={() => navigation.goBack()} /> */}
         <Appbar.Content title="Tạo bài khảo sát" />
       </Appbar.Header>
       <ScrollView contentContainerStyle={styles.container}>
@@ -266,6 +268,7 @@ const CreateSurvey = ({ route }) => {
 const styles = StyleSheet.create({
   container: {
     padding: 16,
+    backgroundColor: "#fff",
   },
   contentInput: {
     minHeight: 100,

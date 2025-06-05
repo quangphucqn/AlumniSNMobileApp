@@ -12,6 +12,7 @@ import { authenticateWithBiometrics } from '../../configs/Utils';
 import * as Google from 'expo-auth-session/providers/google';
 import * as WebBrowser from 'expo-web-browser';
 
+
 export default function Login({ navigation, route }) {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState('');
@@ -33,6 +34,7 @@ export default function Login({ navigation, route }) {
 
   WebBrowser.maybeCompleteAuthSession();
 
+  
   // Cấu hình Google OAuth
   const [request, response, promptAsync] = Google.useAuthRequest({
     iosClientId: IOS_CLIENT_ID,
@@ -136,14 +138,24 @@ export default function Login({ navigation, route }) {
       setMssv('');
     } catch (error) {
       let message = 'Đăng ký tài khoản bằng Google thất bại!';
-      if (error.response?.data?.detail) message = error.response.data.detail;
-      else if (error.response?.data?.message) message = error.response.data.message;
+      const data = error.response?.data;
+      if (data?.detail) message = data.detail;
+      else if (data?.message) message = data.message;
+      // Bổ sung: lấy lỗi từ các field (ví dụ: mssv)
+      else if (typeof data === 'object' && data !== null) {
+        // Lấy lỗi đầu tiên của field đầu tiên (nếu có)
+        const firstField = Object.keys(data)[0];
+        if (firstField && Array.isArray(data[firstField]) && data[firstField][0]) {
+          message = data[firstField][0];
+        }
+      }
       Alert.alert('Lỗi', message);
+
     } finally {
       setRegisterLoading(false);
     }
   };
-
+  
   const handleUnverifiedUser = async () => {
     setShowVerifyModal(true);
     // Không dispatch login, không lưu token

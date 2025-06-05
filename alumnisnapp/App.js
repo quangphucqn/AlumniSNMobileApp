@@ -191,6 +191,9 @@ function AppContent() {
           title: "Bài viết",
           headerTitleAlign: "center",
           headerShown: true,
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+          headerTintColor: "#000",
         }}
       />
       <Stack.Screen name="CreatePostScreen" component={CreatePostScreen} />

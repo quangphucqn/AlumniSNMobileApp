@@ -17,6 +17,7 @@ import { endpoints, getSurveyData } from "../../configs/API";
 import axios from "../../configs/API";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
+import { getValidImageUrl } from "./PostItem";
 
 const UpdatePost = ({ route }) => {
   const { post } = route.params;
@@ -57,9 +58,7 @@ const UpdatePost = ({ route }) => {
           }
 
           return {
-            uri: rawImage.startsWith("http")
-              ? rawImage // là URL đầy đủ thì giữ nguyên
-              : `https://res.cloudinary.com/dizuiutpe/image/upload/${rawImage}`, // còn lại thì nối vào
+            uri: getValidImageUrl(rawImage),
             id: img.id,
           };
         })

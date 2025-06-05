@@ -338,7 +338,6 @@ const styles = StyleSheet.create({
   listStyle: {
     paddingBottom: 100,
     paddingVertical: 12,
-    paddingHorizontal: 8,
   },
   noPostsText: {
     textAlign: "center",

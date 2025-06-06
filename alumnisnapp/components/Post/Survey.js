@@ -124,8 +124,7 @@ const Survey = ({ route }) => {
         );
       }
     } catch (err) {
-      console.error("Error submitting survey:", err);
-      Alert.alert("Khảo sát", "Xảy ra lỗi trong quá trình gửi.");
+      Alert.alert("Khảo sát", "Bạn không có quyền khảo sát.");
     }
   };
 
@@ -177,7 +176,7 @@ const Survey = ({ route }) => {
                 style={styles.avatar}
               />
               <View>
-                <Text style={styles.username}>{post.user.username}</Text>
+                <Text style={styles.username}>{post.user.last_name} {post.user.first_name}</Text>
                 <Text style={styles.postTime}>
                   {moment(post.created_date).fromNow()}
                 </Text>
@@ -305,7 +304,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 8,
-    backgroundColor:"#2563eb",
+    backgroundColor: "#2563eb",
   },
   completedText: {
     fontSize: 18,

@@ -18,7 +18,6 @@ import axios from "../../configs/API";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { getValidImageUrl } from "./PostItem";
-
 const UpdatePost = ({ route }) => {
   const { post } = route.params;
   const { state } = useContext(MyUserContext);
@@ -65,8 +64,8 @@ const UpdatePost = ({ route }) => {
       );
 
       if (
-        post.object_type === "survey" &&
-        route.params.origin === "HomeScreen"
+        post.object_type === "survey" &&(
+        route.params.origin === "HomeScreen"||route.params.origin === "ProfileScreen")
       ) {
         const fetchSurvey = async () => {
           const storedToken = await SecureStore.getItemAsync("access_token");
@@ -122,20 +121,21 @@ const UpdatePost = ({ route }) => {
 
     const newImage = images.find((img) => !img.id);
     if (newImage) {
-      const uri = newImage.uri; // giữ nguyên file://
+      const uri = newImage.uri;
       formData.append("image", {
         uri,
-        type: "image/jpeg", // hoặc png nếu ảnh png
+        type: "image/jpeg",
         name: "image.jpg",
       });
     } else if (images.length === 0) {
-      // Gửi image = "" để backend biết xóa ảnh
       formData.append("image", "");
     }
 
-    // Debug log
-    for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
+    // Nếu là bài khảo sát, gửi thêm các trường
+    if (post.object_type === "survey") {
+      formData.append("survey_type", surveyType);
+      formData.append("end_time", endTime.toISOString());
+      formData.append("questions", JSON.stringify(questions));
     }
 
     try {
@@ -150,10 +150,10 @@ const UpdatePost = ({ route }) => {
       });
 
       if (response.status === 200) {
-        Alert.alert("Đăng bài thành công!");
-        navigation.goBack();
+        Alert.alert("Cập nhật bài viết thành công!");
+        navigation.navigate("MainApp", { screen: "Home" });
       } else {
-        Alert.alert("Đăng bài không thành công");
+        Alert.alert("Cập nhật thất bại.");
       }
     } catch (error) {
       if (error.response) {

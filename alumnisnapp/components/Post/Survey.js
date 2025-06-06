@@ -23,24 +23,25 @@ const Survey = ({ route }) => {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [token, setToken] = useState(null);
   const [hasCompleted, setHasCompleted] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
     const fetchInitialData = async () => {
       const storedToken = await SecureStore.getItemAsync("access_token");
-      console.log("Token:", storedToken);
       setToken(storedToken);
 
       if (storedToken) {
         const surveyData = await getSurveyData(post.id, storedToken);
-        console.log("Survey Data:", surveyData);
         setSurvey(surveyData);
+
+        const isSurveyExpired = moment().isAfter(moment(surveyData.end_time));
+        setIsExpired(isSurveyExpired);
 
         try {
           const res = await authAPI(storedToken).get(
             endpoints["resume"](post.id)
           );
-          console.log("Resume API response:", res.data);
           if (res.status === 200) {
             setHasCompleted(res.data.has_completed);
             if (res.data.answers) {
@@ -124,8 +125,7 @@ const Survey = ({ route }) => {
         );
       }
     } catch (err) {
-      console.error("Error submitting survey:", err);
-      Alert.alert("Khảo sát", "Xảy ra lỗi trong quá trình gửi.");
+      Alert.alert("Khảo sát", "Bạn không có quyền khảo sát.");
     }
   };
 
@@ -142,6 +142,7 @@ const Survey = ({ route }) => {
                   : "unchecked"
               }
               onPress={() => handleCheckboxChange(question.id, option.id)}
+              disabled={hasCompleted || isExpired}
             />
           ) : (
             <RadioButton
@@ -152,6 +153,7 @@ const Survey = ({ route }) => {
                   : "unchecked"
               }
               onPress={() => handleRadioButtonChange(question.id, option.id)}
+              disabled={hasCompleted || isExpired}
             />
           )}
           <Text style={styles.optionText}>{option.option}</Text>
@@ -162,76 +164,71 @@ const Survey = ({ route }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {hasCompleted ? (
+      {(hasCompleted || isExpired) && (
         <Text style={styles.completedText}>
-          Bạn đã hoàn thành khảo sát này.
+          {hasCompleted
+            ? "Bạn đã hoàn thành khảo sát này."
+            : "Khảo sát đã quá hạn."}
         </Text>
-      ) : (
-        <>
-          <View style={styles.postContainer}>
-            <View style={styles.post}>
-              <Image
-                source={{
-                  uri: getValidImageUrl(post.user.avatar),
-                }}
-                style={styles.avatar}
-              />
-              <View>
-                <Text style={styles.username}>{post.user.username}</Text>
-                <Text style={styles.postTime}>
-                  {moment(post.created_date).fromNow()}
-                </Text>
-              </View>
-              <View style={{ flex: 1, alignItems: "flex-end" }}>
-                {survey?.survey_type && (
-                  <Text style={styles.surveyType}>
-                    Loại khảo sát: {surveyTypes[survey.survey_type]}
-                  </Text>
-                )}
-                {survey?.end_time && (
-                  <Text style={styles.endTime}>
-                    Hạn chót: {moment(survey.end_time).format("LLL")}
-                  </Text>
-                )}
-              </View>
-            </View>
-            <Text style={styles.content}>{post.content}</Text>
-            {/* PHẦN HIỂN THỊ ẢNH MINH HỌA ĐÃ BỎ QUA */}
-          </View>
+      )}
 
-          {survey?.questions ? (
-            survey.questions.length > 0 ? (
-              survey.questions.map(renderQuestion)
-            ) : (
-              <Text
-                style={{ textAlign: "center", color: "#888", marginTop: 20 }}
-              >
-                Không có câu hỏi trong khảo sát này.
-              </Text>
-            )
-          ) : (
-            <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
-              Đang tải câu hỏi...
+      <View style={styles.postContainer}>
+        <View style={styles.post}>
+          <Image
+            source={{ uri: getValidImageUrl(post.user.avatar) }}
+            style={styles.avatar}
+          />
+          <View>
+            <Text style={styles.username}>
+              {post.user.last_name} {post.user.first_name}
             </Text>
-          )}
-
-          <View style={styles.buttonContainer}>
-            <Button
-              mode="contained"
-              onPress={handleSaveDraft}
-              style={styles.button}
-            >
-              Lưu nháp
-            </Button>
-            <Button
-              mode="contained"
-              onPress={handleSubmit}
-              style={styles.button}
-            >
-              Gửi
-            </Button>
+            <Text style={styles.postTime}>
+              {moment(post.created_date).fromNow()}
+            </Text>
           </View>
-        </>
+          <View style={{ flex: 1, alignItems: "flex-end" }}>
+            {survey?.survey_type && (
+              <Text style={styles.surveyType}>
+                Loại khảo sát: {surveyTypes[survey.survey_type]}
+              </Text>
+            )}
+            {survey?.end_time && (
+              <Text style={styles.endTime}>
+                Hạn chót: {moment(survey.end_time).format("LLL")}
+              </Text>
+            )}
+          </View>
+        </View>
+        <Text style={styles.content}>{post.content}</Text>
+      </View>
+
+      {survey?.questions ? (
+        survey.questions.length > 0 ? (
+          survey.questions.map(renderQuestion)
+        ) : (
+          <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
+            Không có câu hỏi trong khảo sát này.
+          </Text>
+        )
+      ) : (
+        <Text style={{ textAlign: "center", color: "#888", marginTop: 20 }}>
+          Đang tải câu hỏi...
+        </Text>
+      )}
+
+      {!hasCompleted && !isExpired && (
+        <View style={styles.buttonContainer}>
+          <Button
+            mode="contained"
+            onPress={handleSaveDraft}
+            style={styles.button}
+          >
+            Lưu nháp
+          </Button>
+          <Button mode="contained" onPress={handleSubmit} style={styles.button}>
+            Gửi
+          </Button>
+        </View>
       )}
     </ScrollView>
   );
@@ -305,6 +302,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     marginHorizontal: 8,
+    backgroundColor: "#2563eb",
   },
   completedText: {
     fontSize: 18,

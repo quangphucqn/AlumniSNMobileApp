@@ -96,22 +96,19 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
       const api = authAPI(token);
 
       if (selectedReaction === reactionId) {
-        // Nếu reaction đang chọn giống reaction hiện tại -> xóa reaction
         console.log("Deleting reaction");
         await api.delete(endpoints.react(post.id), {
           validateStatus: (status) => status >= 200 && status < 300,
           headers: { Accept: "application/json" },
         });
 
-        setSelectedReaction(null); // Reset ngay UI
+        setSelectedReaction(null);
       } else {
-        // Nếu reaction khác -> post hoặc update reaction
         console.log("Posting/updating reaction");
         await api.post(endpoints.react(post.id), { reaction: reactionId });
         setSelectedReaction(reactionId);
       }
 
-      // Cập nhật lại số liệu bài post sau thao tác
       await fetchPostData();
 
       setShowReactions(false);
@@ -153,7 +150,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
                 size={20}
                 onPress={async () => {
                   try {
-                    await onPostDeleted(post.id); // chính là handlePostDeletion
+                    await onPostDeleted(post.id); 
                   } catch (err) {
                     console.error(
                       "Lỗi khi gọi onPostDeleted trong PostItem:",
@@ -181,10 +178,11 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           <View style={{ flexDirection: "column", marginLeft: "auto" }}>
             <TouchableOpacity
               onPress={() =>
-            navigation.navigate("PostDetailScreen", {
-                postId: post.id,
-                onCommentAdded: updateCommentCount,
-            })}
+                navigation.navigate("PostDetailScreen", {
+                  postId: post.id,
+                  onCommentAdded: updateCommentCount,
+                })
+              }
               style={{ padding: 5, marginLeft: "auto" }}
             >
               <FontAwesome
@@ -244,6 +242,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
           <Text style={styles.reactionCountText}>{loveCount}</Text>
         </View>
       </View>
+      <View style={styles.divider} />
       <View style={styles.interactions}>
         <TouchableOpacity onPress={() => setShowReactions(!showReactions)}>
           <FontAwesome
@@ -283,8 +282,8 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
         <TouchableOpacity
           onPress={() =>
             navigation.navigate("PostDetailScreen", {
-                postId: post.id,
-                onCommentAdded: updateCommentCount,
+              postId: post.id,
+              onCommentAdded: updateCommentCount,
             })
           }
           style={{ marginLeft: 10 }}
@@ -304,6 +303,11 @@ const styles = StyleSheet.create({
     marginRight: 15,
     fontSize: 14,
     color: "#555",
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#ccc", // hoặc "#ddd" cho sáng hơn
+    marginVertical: 8,
   },
   imagesContainer: {
     flexDirection: "row",

@@ -33,6 +33,7 @@ const Home = () => {
     };
     fetchToken();
   }, []);
+
   const loadPosts = async () => {
     if (page > 0 && token) {
       setLoading(true);
@@ -40,9 +41,24 @@ const Home = () => {
         let url = `${endpoints["post"]}?page=${page}`;
         if (q) url = `${url}&q=${q}`;
         console.log("Fetching posts from:", url);
-        let res = await authAPI(token).get(url);
-        console.log("Response data:", res.data);
-        setPosts(page > 1 ? [...posts, ...res.data.results] : res.data.results);
+
+        const res = await authAPI(token).get(url);
+
+        const newPosts = res.data.results;
+
+        setPosts((prevPosts) => {
+          const existingIds = new Set(prevPosts.map((p) => p.id));
+          const merged = [...prevPosts];
+
+          for (let post of newPosts) {
+            if (!existingIds.has(post.id)) {
+              merged.push(post);
+            }
+          }
+
+          return page === 1 ? newPosts : merged;
+        });
+
         if (res.data.next === null) setPage(0);
       } catch (ex) {
         console.error("Error in loadPosts:", ex);
@@ -109,6 +125,7 @@ const Home = () => {
       origin: "HomeScreen",
     });
   };
+
   useFocusEffect(
     useCallback(() => {
       setPage(1);
@@ -126,30 +143,41 @@ const Home = () => {
         inputStyle={{ color: "gray" }}
         placeholderTextColor="gray"
       />
+
       {posts.length === 0 && !loading ? (
         <Text style={styles.noPostsText}>Không có kết quả tìm kiếm nào</Text>
       ) : (
-        <>
-          <FlatList
-            data={posts}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.listStyle}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <PostItem
-                post={item}
-                fromScreen="Home"
-                onPostDeleted={handlePostDeletion}
-                onPostUpdated={handlePostUpdation}
+        <FlatList
+          data={posts}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.listStyle}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <PostItem
+              post={item}
+              fromScreen="Home"
+              onPostDeleted={handlePostDeletion}
+              onPostUpdated={handlePostUpdation}
+            />
+          )}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.5}
+          refreshControl={
+            <RefreshControl
+              refreshing={loading && page === 1}
+              onRefresh={refresh}
+            />
+          }
+          ListFooterComponent={
+            loading && page > 1 ? (
+              <ActivityIndicator
+                size="small"
+                color="#007BFF"
+                style={styles.footerLoader}
               />
-            )}
-            onEndReached={loadMore}
-            refreshControl={
-              <RefreshControl refreshing={loading} onRefresh={refresh} />
-            }
-          />
-          {loading && <ActivityIndicator />}
-        </>
+            ) : null
+          }
+        />
       )}
     </View>
   );
@@ -169,5 +197,8 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: "gray",
+  },
+  footerLoader: {
+    paddingVertical: 16,
   },
 });

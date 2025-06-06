@@ -43,7 +43,7 @@ export const endpoints = {
   resume: (surveyId) => `/survey/${surveyId}/resume/`,
 
   // Group endpoints
-  groups: "/groups/",
+  groups: "/groups/",  
 
   // Event endpoints
   events: "/event_invite/",

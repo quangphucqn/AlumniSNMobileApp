@@ -96,22 +96,19 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
       const api = authAPI(token);
 
       if (selectedReaction === reactionId) {
-        // Nếu reaction đang chọn giống reaction hiện tại -> xóa reaction
         console.log("Deleting reaction");
         await api.delete(endpoints.react(post.id), {
           validateStatus: (status) => status >= 200 && status < 300,
           headers: { Accept: "application/json" },
         });
 
-        setSelectedReaction(null); // Reset ngay UI
+        setSelectedReaction(null);
       } else {
-        // Nếu reaction khác -> post hoặc update reaction
         console.log("Posting/updating reaction");
         await api.post(endpoints.react(post.id), { reaction: reactionId });
         setSelectedReaction(reactionId);
       }
 
-      // Cập nhật lại số liệu bài post sau thao tác
       await fetchPostData();
 
       setShowReactions(false);
@@ -153,7 +150,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
                 size={20}
                 onPress={async () => {
                   try {
-                    await onPostDeleted(post.id); // chính là handlePostDeletion
+                    await onPostDeleted(post.id); 
                   } catch (err) {
                     console.error(
                       "Lỗi khi gọi onPostDeleted trong PostItem:",

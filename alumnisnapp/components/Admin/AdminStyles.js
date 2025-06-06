@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 13,
-    color: '#888',
+    color: 'red',
     marginBottom: 2,
   },
   verifyBtn: {

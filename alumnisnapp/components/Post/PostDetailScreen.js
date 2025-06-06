@@ -220,7 +220,7 @@ const PostDetailScreen = ({ route }) => {
                 />
                 <View style={styles.replyActions}>
                   <TouchableOpacity onPress={() => selectImage(setEditImage)}>
-                    <Ionicons name="image-outline" size={20} color="blue" />
+                    <Ionicons name="image-outline" size={30} color="gray" />
                   </TouchableOpacity>
                   <IconButton
                     icon="check"
@@ -299,12 +299,12 @@ const PostDetailScreen = ({ route }) => {
                 />
                 <View style={styles.replyActions}>
                   <TouchableOpacity onPress={() => selectImage(setReplyImage)}>
-                    <Ionicons name="image-outline" size={20} color="blue" />
+                    <Ionicons name="image-outline" size={24} color="darkgray" />
                   </TouchableOpacity>
                   <IconButton
                     icon="send"
-                    iconColor="#007BFF"
-                    size={30}
+                    iconColor="#2563eb"
+                    size={26}
                     onPress={() => handleReply(comment.id)}
                   />
                 </View>
@@ -540,12 +540,12 @@ const PostDetailScreen = ({ route }) => {
                   multiline
                 />
                 <TouchableOpacity onPress={() => selectImage(setCommentImage)}>
-                  <Ionicons name="image-outline" size={24} color="blue" />
+                  <Ionicons name="image-outline" size={30} color="darkgray" />
                 </TouchableOpacity>
                 <IconButton
                   icon="send"
-                  iconColor="#007BFF"
-                  size={30}
+                  iconColor="#2563eb"
+                  size={26}
                   onPress={handleComment}
                 />
               </View>

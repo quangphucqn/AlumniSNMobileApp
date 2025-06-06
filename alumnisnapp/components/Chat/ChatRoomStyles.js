@@ -149,6 +149,7 @@ const ChatRoomStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 12,
+    height: 80,
     borderBottomWidth: 0.5,
     borderBottomColor: '#eee',
   },

@@ -22,7 +22,6 @@ export default function ChatRoomDetail() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [input, setInput] = useState('');
   const [hasNext, setHasNext] = useState(true);
-  const lastVisibleRef = useRef(null);
   const { state } = useContext(MyUserContext);
   const currentUserId = state?.user?.id || state?.id;
 
@@ -209,15 +208,16 @@ export default function ChatRoomDetail() {
   };
 
   const normalizeTimestamp = (msg) => {
-    if (!msg.timestamp) return { ...msg, timestamp: null };
-    if (typeof msg.timestamp.toDate === 'function') {
-      return { ...msg, timestamp: msg.timestamp.toDate() };
+    let ts = msg.timestamp || msg.created_date || msg.updated_date;
+    if (!ts) return { ...msg, timestamp: null };
+    if (typeof ts.toDate === 'function') {
+      return { ...msg, timestamp: ts.toDate() };
     }
-    if (msg.timestamp.seconds) {
-      return { ...msg, timestamp: new Date(msg.timestamp.seconds * 1000) };
+    if (ts.seconds) {
+      return { ...msg, timestamp: new Date(ts.seconds * 1000) };
     }
-    if (typeof msg.timestamp === 'string' || typeof msg.timestamp === 'number') {
-      return { ...msg, timestamp: new Date(msg.timestamp) };
+    if (typeof ts === 'string' || typeof ts === 'number') {
+      return { ...msg, timestamp: new Date(ts) };
     }
     return { ...msg, timestamp: null };
   };

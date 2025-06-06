@@ -217,7 +217,7 @@ export const PostItem = ({ post, onPostDeleted, onPostUpdated }) => {
             .filter((img) => img?.image)
             .map((image) => {
               const uri = getValidImageUrl(image.image);
-              console.log("Image URI to render:", uri);
+              // console.log("Image URI to render:", uri);
               return (
                 <Image
                   key={`post-img-${image.id || image.image}`}

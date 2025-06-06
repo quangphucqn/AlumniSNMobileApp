@@ -204,18 +204,27 @@ function AppContent() {
           title: "Chỉnh sửa bài viết",
           headerTitleAlign: "center",
           headerShown: true,
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+          headerTintColor: "#000",
         }}
       />
       <Stack.Screen name="SurveyScreen" component={SurveyScreen} options={{
           title: "Bài khảo sát",
           headerTitleAlign: "center",
           headerShown: true,
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+          headerTintColor: "#000",
         }}/>
       <Stack.Screen name="CreateSurveyScreen" component={CreateSurveyScreen} />
       <Stack.Screen name="UpdateSurveyScreen" component={UpdateSurveyScreen} options={{
           title: "Chỉnh sửa bài khảo sát",
           headerTitleAlign: "center",
           headerShown: true,
+          headerBackVisible: true,
+          headerBackButtonDisplayMode: "minimal",
+          headerTintColor: "#000",
         }}/>
     </Stack.Navigator>
   );

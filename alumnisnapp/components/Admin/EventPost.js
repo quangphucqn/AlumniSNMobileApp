@@ -8,12 +8,6 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getValidImageUrl } from '../Post/PostItem';
 
-const ROLE_OPTIONS = [
-  { label: 'Tất cả', value: '' },
-  { label: 'Admin', value: 0 },
-  { label: 'Giáo viên', value: 2 },
-  { label: 'Sinh viên', value: 1 },
-];
 
 export default function EventPost() {
   const navigation = useNavigation();
@@ -21,8 +15,6 @@ export default function EventPost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [image, setImage] = useState(null);
-  const [groups, setGroups] = useState([]);
-  const [users, setUsers] = useState([]);
   const [recipientType, setRecipientType] = useState('all'); // 'all' | 'groups' | 'users'
   const [selectedGroups, setSelectedGroups] = useState([]); // id nhóm
   const [selectedUsers, setSelectedUsers] = useState([]); // id user
@@ -45,24 +37,6 @@ export default function EventPost() {
   const [tempSelectedUsers, setTempSelectedUsers] = useState([...selectedUsers]);
   const [loading, setLoading] = useState(false);
   const [loadingAllGroups, setLoadingAllGroups] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const token = await SecureStore.getItemAsync('access_token');
-      try {
-        const resGroups = await api.getGroups(token);
-        setGroups(resGroups.data?.results || []);
-      } catch (e) {
-        setGroups([]);
-      }
-      try {
-        const resUsers = await api.userList(token);
-        setUsers(resUsers.data?.results || []);
-      } catch (e) {
-        setUsers([]);
-      }
-    })();
-  }, []);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -154,13 +128,6 @@ export default function EventPost() {
     }
   }, [recipientModalVisible]);
 
-  // --- Toggle select ---
-  const toggleGroup = (id) => {
-    setSelectedGroups(prev => prev.includes(id) ? prev.filter(gid => gid !== id) : [...prev, id]);
-  };
-  const toggleUser = (id) => {
-    setSelectedUsers(prev => prev.includes(id) ? prev.filter(uid => uid !== id) : [...prev, id]);
-  };
 
   // --- Toggle chọn tất cả ---
   const toggleAll = () => {
@@ -275,7 +242,6 @@ export default function EventPost() {
 
   // Thêm logic kiểm tra chọn tất cả
   const isAllGroupsChecked = groupList.length > 0 && tempSelectedGroups.length === groupList.length;
-  const isAllUsersChecked = userList.length > 0 && tempSelectedUsers.length === userList.length;
 
   const handleToggleAllGroups = async () => {
     if (isAllGroupsChecked) {
